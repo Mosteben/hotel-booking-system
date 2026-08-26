@@ -15,8 +15,12 @@ import (
 
 	"github.com/Mosteben/hotel-booking-system/configs"
 	"github.com/Mosteben/hotel-booking-system/pkg/database"
+	"github.com/Mosteben/hotel-booking-system/pkg/middleware"
 	"github.com/Mosteben/hotel-booking-system/routes"
 
+	roomHandler "github.com/Mosteben/hotel-booking-system/internal/room/handler"
+	roomRepository "github.com/Mosteben/hotel-booking-system/internal/room/repository"
+	roomService "github.com/Mosteben/hotel-booking-system/internal/room/service"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -50,6 +54,7 @@ func main() {
 	hotelRepo := hotelRepository.NewHotelRepository(
 		database.DB,
 	)
+	roomRepo := roomRepository.NewRoomRepository(database.DB)
 
 	// =========================
 	// Services
@@ -64,7 +69,7 @@ func main() {
 	hotelSrv := hotelService.NewHotelService(
 		hotelRepo,
 	)
-
+	roomSrv := roomService.NewRoomService(roomRepo)
 	// =========================
 	// Handlers
 	// =========================
@@ -75,6 +80,9 @@ func main() {
 
 	hotel := hotelHandler.NewHotelHandler(
 		hotelSrv,
+	)
+	room := roomHandler.NewRoomHandler(
+		roomSrv,
 	)
 
 	// =========================
@@ -124,6 +132,40 @@ func main() {
 		r,
 		auth,
 		hotel,
+	)
+	// =========================
+	// Room Routes
+	// =========================
+
+	r.GET(
+		"/hotels/:hotel_id/rooms",
+		room.GetRoomsByHotelID,
+	)
+
+	r.GET(
+		"/rooms/:id",
+		room.GetRoomByID,
+	)
+
+	r.POST(
+		"/hotels/:hotel_id/rooms",
+		middleware.AuthMiddleware(),
+		middleware.RequireRoles("admin", "manager"),
+		room.CreateRoom,
+	)
+
+	r.PUT(
+		"/rooms/:id",
+		middleware.AuthMiddleware(),
+		middleware.RequireRoles("admin", "manager"),
+		room.UpdateRoom,
+	)
+
+	r.DELETE(
+		"/rooms/:id",
+		middleware.AuthMiddleware(),
+		middleware.RequireRoles("admin"),
+		room.DeleteRoom,
 	)
 
 	// =========================
