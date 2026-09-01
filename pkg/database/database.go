@@ -10,6 +10,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"github.com/Mosteben/hotel-booking-system/internal/hotel/model"
+	room "github.com/Mosteben/hotel-booking-system/internal/room/model"
 )
 
 var DB *gorm.DB
@@ -37,6 +38,7 @@ func Connect() {
 		&userModel.User{},
 		&profileModel.Profile{},
 		&model.Hotel{},
+		&room.Room{},
 	)
 
 	if err != nil {

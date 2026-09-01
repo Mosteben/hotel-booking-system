@@ -3,6 +3,14 @@ package main
 import (
 	"time"
 
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+
+	"github.com/Mosteben/hotel-booking-system/configs"
+	"github.com/Mosteben/hotel-booking-system/pkg/database"
+	"github.com/Mosteben/hotel-booking-system/pkg/middleware"
+	"github.com/Mosteben/hotel-booking-system/routes"
+
 	authHandler "github.com/Mosteben/hotel-booking-system/internal/auth/handler"
 	authService "github.com/Mosteben/hotel-booking-system/internal/auth/service"
 
@@ -13,12 +21,9 @@ import (
 	profileRepository "github.com/Mosteben/hotel-booking-system/internal/profile/repository"
 	userRepository "github.com/Mosteben/hotel-booking-system/internal/user/repository"
 
-	"github.com/Mosteben/hotel-booking-system/configs"
-	"github.com/Mosteben/hotel-booking-system/pkg/database"
-	"github.com/Mosteben/hotel-booking-system/routes"
-
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
+	roomHandler "github.com/Mosteben/hotel-booking-system/internal/room/handler"
+	roomRepository "github.com/Mosteben/hotel-booking-system/internal/room/repository"
+	roomService "github.com/Mosteben/hotel-booking-system/internal/room/service"
 )
 
 func main() {
@@ -51,6 +56,10 @@ func main() {
 		database.DB,
 	)
 
+	roomRepo := roomRepository.NewRoomRepository(
+		database.DB,
+	)
+
 	// =========================
 	// Services
 	// =========================
@@ -65,6 +74,10 @@ func main() {
 		hotelRepo,
 	)
 
+	roomSrv := roomService.NewRoomService(
+		roomRepo,
+	)
+
 	// =========================
 	// Handlers
 	// =========================
@@ -75,6 +88,10 @@ func main() {
 
 	hotel := hotelHandler.NewHotelHandler(
 		hotelSrv,
+	)
+
+	room := roomHandler.NewRoomHandler(
+		roomSrv,
 	)
 
 	// =========================
@@ -117,13 +134,53 @@ func main() {
 	}))
 
 	// =========================
-	// Routes
+	// Existing Routes
 	// =========================
 
 	routes.RegisterRoutes(
 		r,
 		auth,
 		hotel,
+	)
+
+	// =========================
+	// Room Routes
+	// =========================
+
+	// Get all rooms for a specific hotel
+	r.GET(
+		"/rooms/hotel/:hotel_id",
+		room.GetRoomsByHotelID,
+	)
+
+	// Get room by ID
+	r.GET(
+		"/rooms/:id",
+		room.GetRoomByID,
+	)
+
+	// Create room
+	r.POST(
+		"/rooms/hotel/:hotel_id",
+		middleware.AuthMiddleware(),
+		middleware.RequireRoles("admin", "manager"),
+		room.CreateRoom,
+	)
+
+	// Update room
+	r.PUT(
+		"/rooms/:id",
+		middleware.AuthMiddleware(),
+		middleware.RequireRoles("admin", "manager"),
+		room.UpdateRoom,
+	)
+
+	// Delete room
+	r.DELETE(
+		"/rooms/:id",
+		middleware.AuthMiddleware(),
+		middleware.RequireRoles("admin"),
+		room.DeleteRoom,
 	)
 
 	// =========================
