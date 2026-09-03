@@ -14,6 +14,10 @@ import (
 	authHandler "github.com/Mosteben/hotel-booking-system/internal/auth/handler"
 	authService "github.com/Mosteben/hotel-booking-system/internal/auth/service"
 
+	bookingHandler "github.com/Mosteben/hotel-booking-system/internal/booking/handler"
+	bookingRepository "github.com/Mosteben/hotel-booking-system/internal/booking/repository"
+	bookingService "github.com/Mosteben/hotel-booking-system/internal/booking/service"
+
 	hotelHandler "github.com/Mosteben/hotel-booking-system/internal/hotel/handler"
 	hotelRepository "github.com/Mosteben/hotel-booking-system/internal/hotel/repository"
 	hotelService "github.com/Mosteben/hotel-booking-system/internal/hotel/service"
@@ -60,6 +64,10 @@ func main() {
 		database.DB,
 	)
 
+	bookingRepo := bookingRepository.NewBookingRepository(
+		database.DB,
+	)
+
 	// =========================
 	// Services
 	// =========================
@@ -78,6 +86,10 @@ func main() {
 		roomRepo,
 	)
 
+	bookingSrv := bookingService.NewBookingService(
+		bookingRepo,
+	)
+
 	// =========================
 	// Handlers
 	// =========================
@@ -92,6 +104,10 @@ func main() {
 
 	room := roomHandler.NewRoomHandler(
 		roomSrv,
+	)
+
+	booking := bookingHandler.NewBookingHandler(
+		bookingSrv,
 	)
 
 	// =========================
@@ -181,6 +197,53 @@ func main() {
 		middleware.AuthMiddleware(),
 		middleware.RequireRoles("admin"),
 		room.DeleteRoom,
+	)
+
+	// =========================
+	// Booking Routes
+	// =========================
+
+	// Create booking
+	r.POST(
+		"/bookings",
+		middleware.AuthMiddleware(),
+		booking.CreateBooking,
+	)
+
+	// Get all bookings
+	r.GET(
+		"/bookings",
+		middleware.AuthMiddleware(),
+		middleware.RequireRoles("admin", "manager"),
+		booking.GetAllBookings,
+	)
+
+	// Get my bookings
+	r.GET(
+		"/bookings/my",
+		middleware.AuthMiddleware(),
+		booking.GetMyBookings,
+	)
+
+	// Get booking by ID
+	r.GET(
+		"/bookings/:id",
+		middleware.AuthMiddleware(),
+		booking.GetBookingByID,
+	)
+
+	// Update booking
+	r.PUT(
+		"/bookings/:id",
+		middleware.AuthMiddleware(),
+		booking.UpdateBooking,
+	)
+
+	// Delete booking
+	r.DELETE(
+		"/bookings/:id",
+		middleware.AuthMiddleware(),
+		booking.DeleteBooking,
 	)
 
 	// =========================
