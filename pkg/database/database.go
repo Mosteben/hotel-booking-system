@@ -5,12 +5,13 @@ import (
 	"log"
 
 	"github.com/Mosteben/hotel-booking-system/configs"
+	bookingModel "github.com/Mosteben/hotel-booking-system/internal/booking/model"
+	"github.com/Mosteben/hotel-booking-system/internal/hotel/model"
 	profileModel "github.com/Mosteben/hotel-booking-system/internal/profile/model"
+	room "github.com/Mosteben/hotel-booking-system/internal/room/model"
 	userModel "github.com/Mosteben/hotel-booking-system/internal/user/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"github.com/Mosteben/hotel-booking-system/internal/hotel/model"
-	room "github.com/Mosteben/hotel-booking-system/internal/room/model"
 )
 
 var DB *gorm.DB
@@ -39,6 +40,7 @@ func Connect() {
 		&profileModel.Profile{},
 		&model.Hotel{},
 		&room.Room{},
+		&bookingModel.Booking{},
 	)
 
 	if err != nil {
