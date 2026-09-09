@@ -15,6 +15,7 @@ type HotelService interface {
 	GetHotelByID(id uint) (*model.Hotel, error)
 	UpdateHotel(id uint, hotel *model.Hotel) error
 	DeleteHotel(id uint) error
+	SearchHotels(filters *model.SearchRequest) ([]model.Hotel, error)
 }
 
 type hotelService struct {
@@ -56,7 +57,11 @@ func (s *hotelService) GetHotelByID(id uint) (*model.Hotel, error) {
 	return s.repo.GetByID(id)
 }
 
-func (s *hotelService) UpdateHotel(id uint, hotel *model.Hotel) error {
+func (s *hotelService) UpdateHotel(
+	id uint,
+	hotel *model.Hotel,
+) error {
+
 	if id == 0 {
 		return errors.New("invalid hotel id")
 	}
@@ -95,7 +100,57 @@ func (s *hotelService) DeleteHotel(id uint) error {
 	return s.repo.Delete(id)
 }
 
+func (s *hotelService) SearchHotels(
+	filters *model.SearchRequest,
+) ([]model.Hotel, error) {
+
+	if filters == nil {
+		return nil, errors.New("search filters are required")
+	}
+
+	if filters.Stars < 0 || filters.Stars > 5 {
+		return nil, errors.New(
+			"hotel stars must be between 1 and 5",
+		)
+	}
+
+	if filters.MinPrice < 0 {
+		return nil, errors.New(
+			"minimum price cannot be negative",
+		)
+	}
+
+	if filters.MaxPrice < 0 {
+		return nil, errors.New(
+			"maximum price cannot be negative",
+		)
+	}
+
+	if filters.MinPrice > 0 &&
+		filters.MaxPrice > 0 &&
+		filters.MinPrice > filters.MaxPrice {
+
+		return nil, errors.New(
+			"minimum price cannot be greater than maximum price",
+		)
+	}
+
+	if filters.MinCapacity < 0 {
+		return nil, errors.New(
+			"minimum capacity cannot be negative",
+		)
+	}
+
+	filters.Name = strings.TrimSpace(filters.Name)
+	filters.City = strings.TrimSpace(filters.City)
+	filters.Country = strings.TrimSpace(filters.Country)
+	filters.RoomType = strings.TrimSpace(filters.RoomType)
+
+	return s.repo.Search(filters)
+}
+
 func validateHotel(hotel *model.Hotel) error {
+
 	if hotel == nil {
 		return errors.New("hotel data is required")
 	}
@@ -117,10 +172,14 @@ func validateHotel(hotel *model.Hotel) error {
 	}
 
 	if hotel.Stars < 1 || hotel.Stars > 5 {
-		return errors.New("hotel stars must be between 1 and 5")
+		return errors.New(
+			"hotel stars must be between 1 and 5",
+		)
 	}
 
-	if hotel.Email != "" && !strings.Contains(hotel.Email, "@") {
+	if hotel.Email != "" &&
+		!strings.Contains(hotel.Email, "@") {
+
 		return errors.New("invalid hotel email")
 	}
 

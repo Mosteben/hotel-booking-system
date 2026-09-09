@@ -7,7 +7,6 @@ import (
 
 	"github.com/Mosteben/hotel-booking-system/internal/hotel/model"
 	"github.com/Mosteben/hotel-booking-system/internal/hotel/service"
-
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -16,7 +15,9 @@ type HotelHandler struct {
 	service service.HotelService
 }
 
-func NewHotelHandler(service service.HotelService) *HotelHandler {
+func NewHotelHandler(
+	service service.HotelService,
+) *HotelHandler {
 	return &HotelHandler{
 		service: service,
 	}
@@ -24,12 +25,13 @@ func NewHotelHandler(service service.HotelService) *HotelHandler {
 
 // POST /hotels
 func (h *HotelHandler) CreateHotel(c *gin.Context) {
+
 	var hotel model.Hotel
 
 	if err := c.ShouldBindJSON(&hotel); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "invalid request body",
+			"message": "invalid hotel data",
 			"error":   err.Error(),
 		})
 		return
@@ -52,6 +54,7 @@ func (h *HotelHandler) CreateHotel(c *gin.Context) {
 
 // GET /hotels
 func (h *HotelHandler) GetAllHotels(c *gin.Context) {
+
 	hotels, err := h.service.GetAllHotels()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -69,9 +72,42 @@ func (h *HotelHandler) GetAllHotels(c *gin.Context) {
 	})
 }
 
+// GET /hotels/search
+func (h *HotelHandler) SearchHotels(c *gin.Context) {
+
+	var filters model.SearchRequest
+
+	if err := c.ShouldBindQuery(&filters); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "invalid search parameters",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	hotels, err := h.service.SearchHotels(&filters)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "hotels search completed successfully",
+		"data":    hotels,
+	})
+}
+
 // GET /hotels/:id
 func (h *HotelHandler) GetHotelByID(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+
+	idParam := c.Param("id")
+
+	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil || id == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -82,6 +118,7 @@ func (h *HotelHandler) GetHotelByID(c *gin.Context) {
 
 	hotel, err := h.service.GetHotelByID(uint(id))
 	if err != nil {
+
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"success": false,
@@ -107,7 +144,10 @@ func (h *HotelHandler) GetHotelByID(c *gin.Context) {
 
 // PUT /hotels/:id
 func (h *HotelHandler) UpdateHotel(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+
+	idParam := c.Param("id")
+
+	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil || id == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -121,15 +161,19 @@ func (h *HotelHandler) UpdateHotel(c *gin.Context) {
 	if err := c.ShouldBindJSON(&hotel); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "invalid request body",
+			"message": "invalid hotel data",
 			"error":   err.Error(),
 		})
 		return
 	}
 
-	err = h.service.UpdateHotel(uint(id), &hotel)
+	err = h.service.UpdateHotel(
+		uint(id),
+		&hotel,
+	)
 
 	if err != nil {
+
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"success": false,
@@ -153,7 +197,10 @@ func (h *HotelHandler) UpdateHotel(c *gin.Context) {
 
 // DELETE /hotels/:id
 func (h *HotelHandler) DeleteHotel(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+
+	idParam := c.Param("id")
+
+	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil || id == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -165,6 +212,7 @@ func (h *HotelHandler) DeleteHotel(c *gin.Context) {
 	err = h.service.DeleteHotel(uint(id))
 
 	if err != nil {
+
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"success": false,

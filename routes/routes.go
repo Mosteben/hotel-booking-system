@@ -36,6 +36,14 @@ func RegisterRoutes(
 	// =========================
 
 	r.GET("/hotels", hotel.GetAllHotels)
+
+	// Search hotels
+	//
+	// IMPORTANT:
+	// This route must come before /hotels/:id
+	// because /hotels/:id is a wildcard route.
+	r.GET("/hotels/search", hotel.SearchHotels)
+
 	r.GET("/hotels/:id", hotel.GetHotelByID)
 
 	r.POST(
