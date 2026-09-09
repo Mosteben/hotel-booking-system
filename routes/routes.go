@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	authHandler "github.com/Mosteben/hotel-booking-system/internal/auth/handler"
+	favoriteHandler "github.com/Mosteben/hotel-booking-system/internal/favorite/handler"
 	hotelHandler "github.com/Mosteben/hotel-booking-system/internal/hotel/handler"
 	reviewHandler "github.com/Mosteben/hotel-booking-system/internal/review/handler"
 	"github.com/Mosteben/hotel-booking-system/pkg/middleware"
@@ -16,6 +17,7 @@ func RegisterRoutes(
 	auth *authHandler.AuthHandler,
 	hotel *hotelHandler.HotelHandler,
 	review *reviewHandler.ReviewHandler,
+	favorite *favoriteHandler.FavoriteHandler,
 ) {
 
 	// =========================
@@ -45,6 +47,13 @@ func RegisterRoutes(
 	// This route must come before /hotels/:id
 	// because /hotels/:id is a wildcard route.
 	r.GET("/hotels/search", hotel.SearchHotels)
+
+	// Get hotel details with rooms
+	//
+	// IMPORTANT:
+	// This route must come before /hotels/:id
+	// because /hotels/:id is a wildcard route.
+	r.GET("/hotels/:id/details", hotel.GetHotelDetails)
 
 	r.GET("/hotels/:id", hotel.GetHotelByID)
 
@@ -90,6 +99,31 @@ func RegisterRoutes(
 	r.GET(
 		"/hotels/:id/rating",
 		review.GetHotelAverageRating,
+	)
+
+	// =========================
+	// Favorite Routes
+	// =========================
+
+	// Add hotel to favorites
+	r.POST(
+		"/hotels/:id/favorite",
+		middleware.AuthMiddleware(),
+		favorite.AddFavorite,
+	)
+
+	// Get my favorites
+	r.GET(
+		"/favorites",
+		middleware.AuthMiddleware(),
+		favorite.GetMyFavorites,
+	)
+
+	// Remove hotel from favorites
+	r.DELETE(
+		"/hotels/:id/favorite",
+		middleware.AuthMiddleware(),
+		favorite.RemoveFavorite,
 	)
 
 	// =========================

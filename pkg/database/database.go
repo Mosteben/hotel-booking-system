@@ -6,6 +6,7 @@ import (
 
 	"github.com/Mosteben/hotel-booking-system/configs"
 	bookingModel "github.com/Mosteben/hotel-booking-system/internal/booking/model"
+	favoriteModel "github.com/Mosteben/hotel-booking-system/internal/favorite/model"
 	"github.com/Mosteben/hotel-booking-system/internal/hotel/model"
 	profileModel "github.com/Mosteben/hotel-booking-system/internal/profile/model"
 	reviewModel "github.com/Mosteben/hotel-booking-system/internal/review/model"
@@ -43,6 +44,7 @@ func Connect() {
 		&room.Room{},
 		&bookingModel.Booking{},
 		&reviewModel.Review{},
+		&favoriteModel.Favorite{},
 	)
 
 	if err != nil {

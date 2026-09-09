@@ -3,14 +3,6 @@ package main
 import (
 	"time"
 
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-
-	"github.com/Mosteben/hotel-booking-system/configs"
-	"github.com/Mosteben/hotel-booking-system/pkg/database"
-	"github.com/Mosteben/hotel-booking-system/pkg/middleware"
-	"github.com/Mosteben/hotel-booking-system/routes"
-
 	authHandler "github.com/Mosteben/hotel-booking-system/internal/auth/handler"
 	authService "github.com/Mosteben/hotel-booking-system/internal/auth/service"
 
@@ -18,20 +10,30 @@ import (
 	bookingRepository "github.com/Mosteben/hotel-booking-system/internal/booking/repository"
 	bookingService "github.com/Mosteben/hotel-booking-system/internal/booking/service"
 
+	favoriteHandler "github.com/Mosteben/hotel-booking-system/internal/favorite/handler"
+	favoriteRepository "github.com/Mosteben/hotel-booking-system/internal/favorite/repository"
+	favoriteService "github.com/Mosteben/hotel-booking-system/internal/favorite/service"
+
 	hotelHandler "github.com/Mosteben/hotel-booking-system/internal/hotel/handler"
 	hotelRepository "github.com/Mosteben/hotel-booking-system/internal/hotel/repository"
 	hotelService "github.com/Mosteben/hotel-booking-system/internal/hotel/service"
 
 	profileRepository "github.com/Mosteben/hotel-booking-system/internal/profile/repository"
-	userRepository "github.com/Mosteben/hotel-booking-system/internal/user/repository"
-
 	reviewHandler "github.com/Mosteben/hotel-booking-system/internal/review/handler"
 	reviewRepository "github.com/Mosteben/hotel-booking-system/internal/review/repository"
 	reviewService "github.com/Mosteben/hotel-booking-system/internal/review/service"
-
 	roomHandler "github.com/Mosteben/hotel-booking-system/internal/room/handler"
 	roomRepository "github.com/Mosteben/hotel-booking-system/internal/room/repository"
 	roomService "github.com/Mosteben/hotel-booking-system/internal/room/service"
+	userRepository "github.com/Mosteben/hotel-booking-system/internal/user/repository"
+
+	"github.com/Mosteben/hotel-booking-system/configs"
+	"github.com/Mosteben/hotel-booking-system/pkg/database"
+	"github.com/Mosteben/hotel-booking-system/pkg/middleware"
+	"github.com/Mosteben/hotel-booking-system/routes"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -76,6 +78,10 @@ func main() {
 		database.DB,
 	)
 
+	favoriteRepo := favoriteRepository.NewFavoriteRepository(
+		database.DB,
+	)
+
 	// =========================
 	// Services
 	// =========================
@@ -103,6 +109,10 @@ func main() {
 		reviewRepo,
 	)
 
+	favoriteSrv := favoriteService.NewFavoriteService(
+		favoriteRepo,
+	)
+
 	// =========================
 	// Handlers
 	// =========================
@@ -125,6 +135,10 @@ func main() {
 
 	review := reviewHandler.NewReviewHandler(
 		reviewSrv,
+	)
+
+	favorite := favoriteHandler.NewFavoriteHandler(
+		favoriteSrv,
 	)
 
 	// =========================
@@ -175,6 +189,7 @@ func main() {
 		auth,
 		hotel,
 		review,
+		favorite,
 	)
 
 	// =========================
