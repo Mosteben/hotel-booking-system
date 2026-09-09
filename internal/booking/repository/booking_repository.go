@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/Mosteben/hotel-booking-system/internal/booking/model"
 	"gorm.io/gorm"
 )
@@ -12,6 +14,13 @@ type BookingRepository interface {
 	GetByUserID(userID string) ([]model.Booking, error)
 	Update(booking *model.Booking) error
 	Delete(id uint) error
+
+	IsRoomAvailable(
+		roomID uint,
+		checkIn time.Time,
+		checkOut time.Time,
+		excludeBookingID uint,
+	) (bool, error)
 }
 
 type bookingRepository struct {
@@ -66,4 +75,37 @@ func (r *bookingRepository) Update(booking *model.Booking) error {
 
 func (r *bookingRepository) Delete(id uint) error {
 	return r.db.Delete(&model.Booking{}, id).Error
+}
+
+func (r *bookingRepository) IsRoomAvailable(
+	roomID uint,
+	checkIn time.Time,
+	checkOut time.Time,
+	excludeBookingID uint,
+) (bool, error) {
+
+	var count int64
+
+	query := r.db.
+		Model(&model.Booking{}).
+		Where("room_id = ?", roomID).
+		Where("status != ?", "cancelled").
+		Where(
+			"check_in < ? AND check_out > ?",
+			checkOut,
+			checkIn,
+		)
+
+	// When updating an existing booking,
+	// exclude that booking from the availability check.
+	if excludeBookingID != 0 {
+		query = query.Where("id != ?", excludeBookingID)
+	}
+
+	err := query.Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+
+	return count == 0, nil
 }

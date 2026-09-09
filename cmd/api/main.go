@@ -88,6 +88,7 @@ func main() {
 
 	bookingSrv := bookingService.NewBookingService(
 		bookingRepo,
+		roomRepo,
 	)
 
 	// =========================
@@ -169,6 +170,17 @@ func main() {
 		room.GetRoomsByHotelID,
 	)
 
+	// Check room availability
+	//
+	// IMPORTANT:
+	// This route must come BEFORE /rooms/:id
+	// because /rooms/:id is a wildcard route.
+	r.GET(
+		"/rooms/:id/availability",
+		middleware.AuthMiddleware(),
+		booking.CheckRoomAvailability,
+	)
+
 	// Get room by ID
 	r.GET(
 		"/rooms/:id",
@@ -225,6 +237,15 @@ func main() {
 		booking.GetMyBookings,
 	)
 
+	// Update booking status
+	// Admin and manager only
+	r.PATCH(
+		"/bookings/:id/status",
+		middleware.AuthMiddleware(),
+		middleware.RequireRoles("admin", "manager"),
+		booking.UpdateBookingStatus,
+	)
+
 	// Get booking by ID
 	r.GET(
 		"/bookings/:id",
@@ -239,7 +260,7 @@ func main() {
 		booking.UpdateBooking,
 	)
 
-	// Delete booking
+	// Delete / cancel booking
 	r.DELETE(
 		"/bookings/:id",
 		middleware.AuthMiddleware(),
