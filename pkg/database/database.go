@@ -8,6 +8,7 @@ import (
 	bookingModel "github.com/Mosteben/hotel-booking-system/internal/booking/model"
 	"github.com/Mosteben/hotel-booking-system/internal/hotel/model"
 	profileModel "github.com/Mosteben/hotel-booking-system/internal/profile/model"
+	reviewModel "github.com/Mosteben/hotel-booking-system/internal/review/model"
 	room "github.com/Mosteben/hotel-booking-system/internal/room/model"
 	userModel "github.com/Mosteben/hotel-booking-system/internal/user/model"
 	"gorm.io/driver/postgres"
@@ -41,6 +42,7 @@ func Connect() {
 		&model.Hotel{},
 		&room.Room{},
 		&bookingModel.Booking{},
+		&reviewModel.Review{},
 	)
 
 	if err != nil {

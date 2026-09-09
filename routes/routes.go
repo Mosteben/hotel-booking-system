@@ -5,6 +5,7 @@ import (
 
 	authHandler "github.com/Mosteben/hotel-booking-system/internal/auth/handler"
 	hotelHandler "github.com/Mosteben/hotel-booking-system/internal/hotel/handler"
+	reviewHandler "github.com/Mosteben/hotel-booking-system/internal/review/handler"
 	"github.com/Mosteben/hotel-booking-system/pkg/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ func RegisterRoutes(
 	r *gin.Engine,
 	auth *authHandler.AuthHandler,
 	hotel *hotelHandler.HotelHandler,
+	review *reviewHandler.ReviewHandler,
 ) {
 
 	// =========================
@@ -65,6 +67,29 @@ func RegisterRoutes(
 		middleware.AuthMiddleware(),
 		middleware.RequireRoles("admin"),
 		hotel.DeleteHotel,
+	)
+
+	// =========================
+	// Review Routes
+	// =========================
+
+	// Create review
+	r.POST(
+		"/hotels/:id/reviews",
+		middleware.AuthMiddleware(),
+		review.CreateReview,
+	)
+
+	// Get hotel reviews
+	r.GET(
+		"/hotels/:id/reviews",
+		review.GetHotelReviews,
+	)
+
+	// Get hotel average rating
+	r.GET(
+		"/hotels/:id/rating",
+		review.GetHotelAverageRating,
 	)
 
 	// =========================

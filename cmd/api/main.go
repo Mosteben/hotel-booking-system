@@ -25,6 +25,10 @@ import (
 	profileRepository "github.com/Mosteben/hotel-booking-system/internal/profile/repository"
 	userRepository "github.com/Mosteben/hotel-booking-system/internal/user/repository"
 
+	reviewHandler "github.com/Mosteben/hotel-booking-system/internal/review/handler"
+	reviewRepository "github.com/Mosteben/hotel-booking-system/internal/review/repository"
+	reviewService "github.com/Mosteben/hotel-booking-system/internal/review/service"
+
 	roomHandler "github.com/Mosteben/hotel-booking-system/internal/room/handler"
 	roomRepository "github.com/Mosteben/hotel-booking-system/internal/room/repository"
 	roomService "github.com/Mosteben/hotel-booking-system/internal/room/service"
@@ -68,6 +72,10 @@ func main() {
 		database.DB,
 	)
 
+	reviewRepo := reviewRepository.NewReviewRepository(
+		database.DB,
+	)
+
 	// =========================
 	// Services
 	// =========================
@@ -91,6 +99,10 @@ func main() {
 		roomRepo,
 	)
 
+	reviewSrv := reviewService.NewReviewService(
+		reviewRepo,
+	)
+
 	// =========================
 	// Handlers
 	// =========================
@@ -109,6 +121,10 @@ func main() {
 
 	booking := bookingHandler.NewBookingHandler(
 		bookingSrv,
+	)
+
+	review := reviewHandler.NewReviewHandler(
+		reviewSrv,
 	)
 
 	// =========================
@@ -158,6 +174,7 @@ func main() {
 		r,
 		auth,
 		hotel,
+		review,
 	)
 
 	// =========================
