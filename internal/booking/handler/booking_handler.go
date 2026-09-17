@@ -8,6 +8,7 @@ import (
 
 	"github.com/Mosteben/hotel-booking-system/internal/booking/model"
 	"github.com/Mosteben/hotel-booking-system/internal/booking/service"
+	"github.com/Mosteben/hotel-booking-system/pkg/response"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,6 +26,18 @@ func NewBookingHandler(service service.BookingService) *BookingHandler {
 // Create Booking
 // =========================
 
+// CreateBooking godoc
+// @Summary Create a booking
+// @Description Create a new hotel room booking for the authenticated user.
+// @Tags Bookings
+// @Accept json
+// @Produce json
+// @Param request body model.Booking true "Booking data"
+// @Success 201 {object} model.Booking
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Security BearerAuth
+// @Router /bookings [post]
 func (h *BookingHandler) CreateBooking(c *gin.Context) {
 	var booking model.Booking
 
@@ -67,11 +80,22 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 // Get All Bookings
 // =========================
 
+// GetAllBookings godoc
+// @Summary Get all bookings
+// @Description Get all bookings. Admin and manager users only.
+// @Tags Bookings
+// @Produce json
+// @Success 200 {array} model.Booking
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /bookings [get]
 func (h *BookingHandler) GetAllBookings(c *gin.Context) {
 	bookings, err := h.service.GetAllBookings()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": response.SanitizedError("GetAllBookings", err),
 		})
 		return
 	}
@@ -83,6 +107,20 @@ func (h *BookingHandler) GetAllBookings(c *gin.Context) {
 // Get Booking By ID
 // =========================
 
+// GetBookingByID godoc
+// @Summary Get booking by ID
+// @Description Get a booking by ID. Customers can only view their own bookings, while admins and managers can view any booking.
+// @Tags Bookings
+// @Produce json
+// @Param id path int true "Booking ID"
+// @Success 200 {object} model.Booking
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /bookings/{id} [get]
 func (h *BookingHandler) GetBookingByID(c *gin.Context) {
 	id, err := strconv.ParseUint(
 		c.Param("id"),
@@ -151,7 +189,7 @@ func (h *BookingHandler) GetBookingByID(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": response.SanitizedError("GetBookingByID", err),
 		})
 		return
 	}
@@ -163,6 +201,16 @@ func (h *BookingHandler) GetBookingByID(c *gin.Context) {
 // Get My Bookings
 // =========================
 
+// GetMyBookings godoc
+// @Summary Get my bookings
+// @Description Get all bookings belonging to the authenticated user.
+// @Tags Bookings
+// @Produce json
+// @Success 200 {array} model.Booking
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /bookings/my [get]
 func (h *BookingHandler) GetMyBookings(c *gin.Context) {
 	userIDValue, exists := c.Get("userID")
 	if !exists {
@@ -183,7 +231,7 @@ func (h *BookingHandler) GetMyBookings(c *gin.Context) {
 	bookings, err := h.service.GetBookingsByUserID(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": response.SanitizedError("GetMyBookings", err),
 		})
 		return
 	}
@@ -195,6 +243,22 @@ func (h *BookingHandler) GetMyBookings(c *gin.Context) {
 // Update Booking
 // =========================
 
+// UpdateBooking godoc
+// @Summary Update a booking
+// @Description Update an existing booking. Customers can only update their own bookings.
+// @Tags Bookings
+// @Accept json
+// @Produce json
+// @Param id path int true "Booking ID"
+// @Param request body model.Booking true "Updated booking data"
+// @Success 200 {object} model.Booking
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /bookings/{id} [put]
 func (h *BookingHandler) UpdateBooking(c *gin.Context) {
 	id, err := strconv.ParseUint(
 		c.Param("id"),
@@ -293,7 +357,7 @@ func (h *BookingHandler) UpdateBooking(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": response.SanitizedError("UpdateBooking", err),
 		})
 		return
 	}
@@ -305,6 +369,19 @@ func (h *BookingHandler) UpdateBooking(c *gin.Context) {
 // Delete / Cancel Booking
 // =========================
 
+// DeleteBooking godoc
+// @Summary Cancel a booking
+// @Description Cancel an existing booking belonging to the authenticated user. The booking is marked as cancelled instead of being deleted.
+// @Tags Bookings
+// @Produce json
+// @Param id path int true "Booking ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Security BearerAuth
+// @Router /bookings/{id} [delete]
 func (h *BookingHandler) DeleteBooking(c *gin.Context) {
 	id, err := strconv.ParseUint(
 		c.Param("id"),
@@ -369,6 +446,20 @@ func (h *BookingHandler) DeleteBooking(c *gin.Context) {
 // Update Booking Status
 // =========================
 
+// UpdateBookingStatus godoc
+// @Summary Update booking status
+// @Description Confirm or cancel a booking. Admin and manager users only.
+// @Tags Bookings
+// @Accept json
+// @Produce json
+// @Param id path int true "Booking ID"
+// @Param request body object{status=string} true "Booking status"
+// @Success 200 {object} model.Booking
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Security BearerAuth
+// @Router /bookings/{id}/status [patch]
 func (h *BookingHandler) UpdateBookingStatus(c *gin.Context) {
 	id, err := strconv.ParseUint(
 		c.Param("id"),
@@ -471,7 +562,7 @@ func (h *BookingHandler) UpdateBookingStatus(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": response.SanitizedError("UpdateBookingStatus", err),
 		})
 		return
 	}
@@ -483,6 +574,19 @@ func (h *BookingHandler) UpdateBookingStatus(c *gin.Context) {
 // Check Room Availability
 // =========================
 
+// CheckRoomAvailability godoc
+// @Summary Check room availability
+// @Description Check whether a room is available for the specified date range.
+// @Tags Room Availability
+// @Produce json
+// @Param id path int true "Room ID"
+// @Param check_in query string true "Check-in date in YYYY-MM-DD format"
+// @Param check_out query string true "Check-out date in YYYY-MM-DD format"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /rooms/{id}/availability [get]
 func (h *BookingHandler) CheckRoomAvailability(c *gin.Context) {
 	// Get room ID from /rooms/:id/availability
 	roomID, err := strconv.ParseUint(
@@ -552,7 +656,7 @@ func (h *BookingHandler) CheckRoomAvailability(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": response.SanitizedError("CheckRoomAvailability", err),
 		})
 		return
 	}

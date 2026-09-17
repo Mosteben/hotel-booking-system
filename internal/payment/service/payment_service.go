@@ -8,9 +8,28 @@ import (
 	"gorm.io/gorm"
 
 	bookingRepository "github.com/Mosteben/hotel-booking-system/internal/booking/repository"
+	hotelModel "github.com/Mosteben/hotel-booking-system/internal/hotel/model"
 	paymentModel "github.com/Mosteben/hotel-booking-system/internal/payment/model"
 	"github.com/Mosteben/hotel-booking-system/internal/payment/repository"
+	roomModel "github.com/Mosteben/hotel-booking-system/internal/room/model"
+	userModel "github.com/Mosteben/hotel-booking-system/internal/user/model"
 )
+
+// userLister/roomLister/hotelLister are the minimal slices of
+// UserRepository/RoomRepository/HotelRepository this service needs for
+// Admin DTO resolution - the real repositories already satisfy these, so
+// tests can use small local fakes instead of mocking the full interfaces.
+type userLister interface {
+	GetByIDs(ids []string) ([]userModel.User, error)
+}
+
+type roomLister interface {
+	GetByIDs(ids []uint) ([]roomModel.Room, error)
+}
+
+type hotelLister interface {
+	GetByIDs(ids []uint) ([]hotelModel.Hotel, error)
+}
 
 var (
 	ErrPaymentAlreadyExists = errors.New("payment already exists for this booking")
@@ -34,7 +53,10 @@ type PaymentService interface {
 		userID string,
 	) ([]paymentModel.Payment, error)
 
-	GetAllPayments() ([]paymentModel.Payment, error)
+	// GetAllPayments is admin/manager only - it returns each payment with
+	// its payer, booking, hotel, and room resolved server-side (see
+	// AdminPaymentSummary).
+	GetAllPayments() ([]AdminPaymentSummary, error)
 
 	UpdatePaymentStatus(
 		id uint,
@@ -45,17 +67,26 @@ type PaymentService interface {
 type paymentService struct {
 	repo        repository.PaymentRepository
 	bookingRepo bookingRepository.BookingRepository
+	userRepo    userLister
+	roomRepo    roomLister
+	hotelRepo   hotelLister
 	db          *gorm.DB
 }
 
 func NewPaymentService(
 	repo repository.PaymentRepository,
 	bookingRepo bookingRepository.BookingRepository,
+	userRepo userLister,
+	roomRepo roomLister,
+	hotelRepo hotelLister,
 	db *gorm.DB,
 ) PaymentService {
 	return &paymentService{
 		repo:        repo,
 		bookingRepo: bookingRepo,
+		userRepo:    userRepo,
+		roomRepo:    roomRepo,
+		hotelRepo:   hotelRepo,
 		db:          db,
 	}
 }
@@ -160,10 +191,15 @@ func (s *paymentService) GetPaymentsByUserID(
 // =========================
 
 func (s *paymentService) GetAllPayments() (
-	[]paymentModel.Payment,
+	[]AdminPaymentSummary,
 	error,
 ) {
-	return s.repo.GetAll()
+	payments, err := s.repo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	return s.resolveAdminPaymentSummaries(payments)
 }
 
 // =========================
@@ -349,4 +385,3 @@ func (s *paymentService) UpdatePaymentStatus(
 		return ErrInvalidPaymentStatus
 	})
 }
-

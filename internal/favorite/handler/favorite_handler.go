@@ -7,6 +7,7 @@ import (
 
 	"github.com/Mosteben/hotel-booking-system/internal/favorite/model"
 	"github.com/Mosteben/hotel-booking-system/internal/favorite/service"
+	"github.com/Mosteben/hotel-booking-system/pkg/response"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,7 +27,17 @@ func NewFavoriteHandler(
 // Add Favorite
 // =========================
 
-// POST /hotels/:id/favorite
+// AddFavorite godoc
+// @Summary Add hotel to favorites
+// @Description Add a hotel to the authenticated user's favorites.
+// @Tags Favorites
+// @Produce json
+// @Param id path int true "Hotel ID"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /hotels/{id}/favorite [post]
 func (h *FavoriteHandler) AddFavorite(c *gin.Context) {
 
 	hotelID, err := strconv.ParseUint(
@@ -87,7 +98,16 @@ func (h *FavoriteHandler) AddFavorite(c *gin.Context) {
 // Get My Favorites
 // =========================
 
-// GET /favorites
+// GetMyFavorites godoc
+// @Summary Get my favorite hotels
+// @Description Get all hotels saved as favorites by the authenticated user.
+// @Tags Favorites
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /favorites [get]
 func (h *FavoriteHandler) GetMyFavorites(c *gin.Context) {
 
 	userIDValue, exists := c.Get("userID")
@@ -116,7 +136,7 @@ func (h *FavoriteHandler) GetMyFavorites(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "failed to get favorites",
-			"error":   err.Error(),
+			"error":   response.SanitizedError("GetMyFavorites", err),
 		})
 		return
 	}
@@ -132,7 +152,18 @@ func (h *FavoriteHandler) GetMyFavorites(c *gin.Context) {
 // Remove Favorite
 // =========================
 
-// DELETE /hotels/:id/favorite
+// RemoveFavorite godoc
+// @Summary Remove hotel from favorites
+// @Description Remove a hotel from the authenticated user's favorites.
+// @Tags Favorites
+// @Produce json
+// @Param id path int true "Hotel ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /hotels/{id}/favorite [delete]
 func (h *FavoriteHandler) RemoveFavorite(c *gin.Context) {
 
 	hotelID, err := strconv.ParseUint(

@@ -88,6 +88,12 @@ func (m *mockBookingRepository) GetByID(
 	return m.booking, m.getByIDErr
 }
 
+func (m *mockBookingRepository) GetByIDs(
+	ids []uint,
+) ([]bookingModel.Booking, error) {
+	return nil, nil
+}
+
 func (m *mockBookingRepository) GetByUserID(
 	userID string,
 ) ([]bookingModel.Booking, error) {

@@ -1,0 +1,143 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Manrope", "Inter", sans-serif;
+  --font-sans: "Inter", "Manrope", sans-serif;
+
+  /* Pure light-blue accent instead of teal, pure white background */
+  --color-teal: #2f6fed; /* primary blue — buttons, links */
+  --color-teal-dark: #1d4fd1; /* hover / active state */
+  --color-teal-light: #5b93f5; /* light accents, small labels */
+  --color-bg: #ffffff; /* pure white page background */
+  --color-ink: #101828; /* near-black navy for headings/body text */
+  --color-muted: #667085; /* neutral gray for secondary text */
+  --color-line: #e6e9f0; /* soft cool-gray borders */
+
+  --color-cream: #eaf1ff; /* light blue-tinted surface, replaces cream */
+  --color-cream-dark: #d7e5ff;
+  --color-gold: #2f6fed; /* kept name for compatibility, now blue */
+
+  --radius-panel: 32px;
+  --radius-card: 24px;
+  --radius-pill: 999px;
+}
+
+/* ============ Auth pages: thin scroll + entrance animations ============ */
+
+.auth-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-teal-light) transparent;
+}
+.auth-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.auth-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.auth-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--color-teal-light);
+  border-radius: 999px;
+}
+
+/* Form content fade/slide in */
+@keyframes auth-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.auth-fade-in {
+  animation: auth-fade-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Whole card (image + form) gently scales/fades in on load */
+@keyframes auth-card-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.98) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.auth-card-in {
+  animation: auth-card-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s ease;
+}
+.auth-card-in:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 40px 90px -25px rgba(47, 111, 237, 0.28);
+}
+
+/* Soft blue blobs drifting slowly behind the card */
+@keyframes auth-blob-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(24px, -28px) scale(1.06);
+  }
+}
+.auth-blob {
+  animation: auth-blob-float 11s ease-in-out infinite;
+}
+.auth-blob-delay {
+  animation-delay: -5.5s;
+}
+
+/* Brand image gets a subtle zoom-out entrance */
+@keyframes auth-image-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.auth-image-in {
+  animation: auth-image-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-fade-in,
+  .auth-card-in,
+  .auth-image-in,
+  .auth-blob {
+    animation: none;
+  }
+  .auth-card-in:hover {
+    transform: none;
+  }
+}
+
+/* ============ Shared page entrance (non-auth pages) ============ */
+
+@keyframes page-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.page-fade-in {
+  animation: page-fade-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-fade-in {
+    animation: none;
+  }
+}

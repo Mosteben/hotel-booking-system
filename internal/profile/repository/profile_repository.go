@@ -38,10 +38,10 @@ func (r *ProfileRepository) FindByUserID(userID string) (*profileModel.Profile, 
 	return &profile, nil
 }
 
-func (r *ProfileRepository) CreateTx(tx *gorm.DB, profile *profileModel.Profile,) error {
+func (r *ProfileRepository) CreateTx(tx *gorm.DB, profile *profileModel.Profile) error {
 	return tx.Create(profile).Error
 }
 
-func (r *ProfileRepository) UpdateTx(tx *gorm.DB,profile *profileModel.Profile,) error {
+func (r *ProfileRepository) UpdateTx(tx *gorm.DB, profile *profileModel.Profile) error {
 	return tx.Save(profile).Error
 }

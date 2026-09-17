@@ -7,13 +7,36 @@ import (
 
 	"github.com/Mosteben/hotel-booking-system/internal/booking/model"
 	"github.com/Mosteben/hotel-booking-system/internal/booking/repository"
-	roomRepository "github.com/Mosteben/hotel-booking-system/internal/room/repository"
+	hotelModel "github.com/Mosteben/hotel-booking-system/internal/hotel/model"
+	roomModel "github.com/Mosteben/hotel-booking-system/internal/room/model"
+	userModel "github.com/Mosteben/hotel-booking-system/internal/user/model"
 	"gorm.io/gorm"
 )
 
+// userLister/hotelLister/roomLister are the minimal slices of
+// UserRepository/HotelRepository/RoomRepository this service needs. The
+// real repositories already satisfy these (structural typing), so this
+// keeps the service testable without mocking their full interfaces.
+type userLister interface {
+	GetByIDs(ids []string) ([]userModel.User, error)
+}
+
+type hotelLister interface {
+	GetByIDs(ids []uint) ([]hotelModel.Hotel, error)
+	GetByID(id uint) (*hotelModel.Hotel, error)
+}
+
+type roomLister interface {
+	GetByID(id uint) (*roomModel.Room, error)
+	GetByIDs(ids []uint) ([]roomModel.Room, error)
+}
+
 type BookingService interface {
 	CreateBooking(booking *model.Booking) error
-	GetAllBookings() ([]model.Booking, error)
+	// GetAllBookings is admin/manager only - it returns the booking with
+	// its user/hotel/room resolved server-side (see AdminBookingSummary),
+	// unlike every other method here which stays on the raw model.
+	GetAllBookings() ([]AdminBookingSummary, error)
 	GetBookingByID(id uint, userID string, role string) (*model.Booking, error)
 	GetBookingsByUserID(userID string) ([]model.Booking, error)
 	UpdateBooking(id uint, userID string, booking *model.Booking) error
@@ -29,18 +52,69 @@ type BookingService interface {
 }
 
 type bookingService struct {
-	repo     repository.BookingRepository
-	roomRepo roomRepository.RoomRepository
+	repo      repository.BookingRepository
+	roomRepo  roomLister
+	userRepo  userLister
+	hotelRepo hotelLister
+	db        *gorm.DB
 }
 
 func NewBookingService(
 	repo repository.BookingRepository,
-	roomRepo roomRepository.RoomRepository,
+	roomRepo roomLister,
+	userRepo userLister,
+	hotelRepo hotelLister,
+	db *gorm.DB,
 ) BookingService {
 	return &bookingService{
-		repo:     repo,
-		roomRepo: roomRepo,
+		repo:      repo,
+		roomRepo:  roomRepo,
+		userRepo:  userRepo,
+		hotelRepo: hotelRepo,
+		db:        db,
 	}
+}
+
+// =========================
+// Booking Snapshot
+// =========================
+
+// applyBookingSnapshot loads the room's hotel and stamps booking with a
+// point-in-time copy of the room/hotel details (hotel_id, hotel_name,
+// room_number, room_type, price_per_night). This is what lets a booking
+// stay a meaningful historical record even after its room or hotel is
+// later deleted - the raw RoomID FK can go stale, but these columns don't.
+//
+// If the request supplied a hotel_id (booking.HotelID != 0), it's
+// cross-checked against the room's real hotel and rejected on mismatch -
+// but never trusted as the value actually stored: every snapshot field is
+// always overwritten from the server-loaded room/hotel below, regardless
+// of what the client sent.
+func (s *bookingService) applyBookingSnapshot(
+	booking *model.Booking,
+	room *roomModel.Room,
+) error {
+
+	if booking.HotelID != 0 && booking.HotelID != room.HotelID {
+		return errors.New("room does not belong to the specified hotel")
+	}
+
+	hotel, err := s.hotelRepo.GetByID(room.HotelID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("hotel not found")
+		}
+
+		return err
+	}
+
+	booking.HotelID = hotel.ID
+	booking.HotelName = hotel.Name
+	booking.RoomNumber = room.RoomNumber
+	booking.RoomType = room.Type
+	booking.PricePerNight = room.PricePerNight
+
+	return nil
 }
 
 // =========================
@@ -90,28 +164,54 @@ func (s *bookingService) CreateBooking(
 	// Calculate total price on the server.
 	booking.TotalPrice = room.PricePerNight * float64(nights)
 
-	// Check room availability for the selected dates.
-	available, err := s.repo.IsRoomAvailable(
-		booking.RoomID,
-		booking.CheckIn,
-		booking.CheckOut,
-		0,
-	)
-
-	if err != nil {
+	if err := s.applyBookingSnapshot(booking, room); err != nil {
 		return err
-	}
-
-	if !available {
-		return errors.New(
-			"room is not available for the selected dates",
-		)
 	}
 
 	// New bookings always start as pending.
 	booking.Status = "pending"
 
-	return s.repo.Create(booking)
+	// The availability check and the insert must happen inside the same
+	// transaction and be serialized per room, otherwise two concurrent
+	// requests for the same room/dates can both pass the check before
+	// either commits (TOCTOU race). A plain transaction is not enough on
+	// its own: under Postgres' default READ COMMITTED isolation, the
+	// availability check is a "no matching rows" query, so two concurrent
+	// transactions can each see zero conflicts and both insert. A
+	// session-scoped advisory lock keyed on the room ID closes that gap -
+	// the second concurrent transaction blocks on the lock until the
+	// first commits or rolls back, so its availability check always sees
+	// whatever the first transaction just created. Postgres releases the
+	// lock automatically at the end of the transaction.
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec(
+			"SELECT pg_advisory_xact_lock(?)",
+			int64(booking.RoomID),
+		).Error; err != nil {
+			return err
+		}
+
+		txRepo := s.repo.WithTx(tx)
+
+		available, err := txRepo.IsRoomAvailable(
+			booking.RoomID,
+			booking.CheckIn,
+			booking.CheckOut,
+			0,
+		)
+
+		if err != nil {
+			return err
+		}
+
+		if !available {
+			return errors.New(
+				"room is not available for the selected dates",
+			)
+		}
+
+		return txRepo.Create(booking)
+	})
 }
 
 // =========================
@@ -119,10 +219,15 @@ func (s *bookingService) CreateBooking(
 // =========================
 
 func (s *bookingService) GetAllBookings() (
-	[]model.Booking,
+	[]AdminBookingSummary,
 	error,
 ) {
-	return s.repo.GetAll()
+	bookings, err := s.repo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	return s.resolveAdminBookingSummaries(bookings)
 }
 
 // =========================
@@ -235,26 +340,6 @@ func (s *bookingService) UpdateBooking(
 		)
 	}
 
-	// Check room availability.
-	// Exclude the current booking so it doesn't
-	// conflict with itself.
-	available, err := s.repo.IsRoomAvailable(
-		booking.RoomID,
-		booking.CheckIn,
-		booking.CheckOut,
-		id,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	if !available {
-		return errors.New(
-			"room is not available for the selected dates",
-		)
-	}
-
 	// Calculate number of nights.
 	nights := int(
 		booking.CheckOut.Sub(booking.CheckIn).Hours() / 24,
@@ -267,16 +352,85 @@ func (s *bookingService) UpdateBooking(
 	// Calculate total price on the server.
 	totalPrice := room.PricePerNight * float64(nights)
 
-	existingBooking.RoomID = booking.RoomID
-	existingBooking.CheckIn = booking.CheckIn
-	existingBooking.CheckOut = booking.CheckOut
-	existingBooking.Guests = booking.Guests
-	existingBooking.TotalPrice = totalPrice
+	// Refresh the snapshot too - if the room changed, the old snapshot
+	// (hotel_name/room_number/room_type/price_per_night) would otherwise
+	// keep describing the previous room while room_id already points at
+	// the new one.
+	if err := s.applyBookingSnapshot(booking, room); err != nil {
+		return err
+	}
 
-	// Status is controlled by the system.
-	// Customer cannot change booking status here.
+	oldRoomID := existingBooking.RoomID
+	newRoomID := booking.RoomID
 
-	return s.repo.Update(existingBooking)
+	// The availability check and the update must happen inside the same
+	// transaction and be serialized per room, for the same reason as
+	// CreateBooking: under Postgres' default READ COMMITTED isolation, a
+	// plain transaction alone doesn't stop two concurrent updates from
+	// each observing "no conflicts" before either commits. If the room is
+	// being changed, both the old and new room are locked - always in
+	// ascending room-ID order, regardless of which one is "old" or "new"
+	// - so two concurrent updates touching an overlapping pair of rooms
+	// always acquire their locks in the same order and can never deadlock
+	// on each other.
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		lockRoomIDs := []uint{oldRoomID}
+
+		if newRoomID != oldRoomID {
+			if newRoomID < oldRoomID {
+				lockRoomIDs = []uint{newRoomID, oldRoomID}
+			} else {
+				lockRoomIDs = append(lockRoomIDs, newRoomID)
+			}
+		}
+
+		for _, roomID := range lockRoomIDs {
+			if err := tx.Exec(
+				"SELECT pg_advisory_xact_lock(?)",
+				int64(roomID),
+			).Error; err != nil {
+				return err
+			}
+		}
+
+		txRepo := s.repo.WithTx(tx)
+
+		// Check room availability.
+		// Exclude the current booking so it doesn't
+		// conflict with itself.
+		available, err := txRepo.IsRoomAvailable(
+			newRoomID,
+			booking.CheckIn,
+			booking.CheckOut,
+			id,
+		)
+
+		if err != nil {
+			return err
+		}
+
+		if !available {
+			return errors.New(
+				"room is not available for the selected dates",
+			)
+		}
+
+		existingBooking.RoomID = booking.RoomID
+		existingBooking.CheckIn = booking.CheckIn
+		existingBooking.CheckOut = booking.CheckOut
+		existingBooking.Guests = booking.Guests
+		existingBooking.TotalPrice = totalPrice
+		existingBooking.HotelID = booking.HotelID
+		existingBooking.HotelName = booking.HotelName
+		existingBooking.RoomNumber = booking.RoomNumber
+		existingBooking.RoomType = booking.RoomType
+		existingBooking.PricePerNight = booking.PricePerNight
+
+		// Status is controlled by the system.
+		// Customer cannot change booking status here.
+
+		return txRepo.Update(existingBooking)
+	})
 }
 
 // =========================

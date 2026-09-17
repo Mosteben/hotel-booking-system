@@ -16,7 +16,7 @@ type User struct {
 
 	Email string `gorm:"size:255;uniqueIndex;not null"`
 
-	Password string `gorm:"not null"`
+	Password string `gorm:"not null" json:"-"`
 
 	Phone string `gorm:"size:20;uniqueIndex;not null"`
 

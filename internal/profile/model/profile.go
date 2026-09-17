@@ -6,7 +6,6 @@ import (
 )
 
 type Profile struct {
-
 	ID uint `gorm:"primaryKey"`
 
 	UserID uuid.UUID `gorm:"type:uuid;uniqueIndex"`

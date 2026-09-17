@@ -29,6 +29,34 @@ func (r *UserRepository) Delete(id string) error {
 	return r.db.Delete(&model.User{}, "id = ?", id).Error
 }
 
+func (r *UserRepository) GetAll() ([]model.User, error) {
+
+	var users []model.User
+
+	err := r.db.
+		Order("created_at DESC").
+		Find(&users).Error
+
+	return users, err
+}
+
+// GetByIDs batch-fetches users for Admin DTO resolution (bookings,
+// payments, reviews) so those don't do one query per row.
+func (r *UserRepository) GetByIDs(ids []string) ([]model.User, error) {
+
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	var users []model.User
+
+	err := r.db.
+		Where("id IN ?", ids).
+		Find(&users).Error
+
+	return users, err
+}
+
 func (r *UserRepository) FindByID(id string) (*model.User, error) {
 
 	var user model.User
@@ -93,6 +121,6 @@ func (r *UserRepository) ExistsByPhone(phone string) (bool, error) {
 func (r *UserRepository) CreateTx(tx *gorm.DB, user *model.User) error {
 	return tx.Create(user).Error
 }
-func (r *UserRepository) UpdateTx(tx *gorm.DB,user *model.User,) error {
+func (r *UserRepository) UpdateTx(tx *gorm.DB, user *model.User) error {
 	return tx.Save(user).Error
 }

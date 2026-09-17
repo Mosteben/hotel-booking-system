@@ -11,6 +11,9 @@ type BookingRepository interface {
 	Create(booking *model.Booking) error
 	GetAll() ([]model.Booking, error)
 	GetByID(id uint) (*model.Booking, error)
+	// GetByIDs batch-fetches bookings for Admin DTO resolution (payments),
+	// so those don't do one query per row.
+	GetByIDs(ids []uint) ([]model.Booking, error)
 	GetByUserID(userID string) ([]model.Booking, error)
 	Update(booking *model.Booking) error
 	Delete(id uint) error
@@ -21,6 +24,9 @@ type BookingRepository interface {
 		checkOut time.Time,
 		excludeBookingID uint,
 	) (bool, error)
+
+	// Create a repository that uses the provided transaction.
+	WithTx(tx *gorm.DB) BookingRepository
 }
 
 type bookingRepository struct {
@@ -30,6 +36,14 @@ type bookingRepository struct {
 func NewBookingRepository(db *gorm.DB) BookingRepository {
 	return &bookingRepository{
 		db: db,
+	}
+}
+
+func (r *bookingRepository) WithTx(
+	tx *gorm.DB,
+) BookingRepository {
+	return &bookingRepository{
+		db: tx,
 	}
 }
 
@@ -58,7 +72,23 @@ func (r *bookingRepository) GetByID(id uint) (*model.Booking, error) {
 	return &booking, nil
 }
 
-func (r *bookingRepository) GetByUserID(userID string) ([]model.Booking, error) {
+func (r *bookingRepository) GetByIDs(ids []uint) ([]model.Booking, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	var bookings []model.Booking
+
+	err := r.db.
+		Where("id IN ?", ids).
+		Find(&bookings).Error
+
+	return bookings, err
+}
+
+func (r *bookingRepository) GetByUserID(
+	userID string,
+) ([]model.Booking, error) {
 	var bookings []model.Booking
 
 	err := r.db.

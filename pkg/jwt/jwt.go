@@ -67,6 +67,12 @@ func ParseToken(tokenString string) (*Claims, error) {
 				configs.GetEnv("JWT_SECRET"),
 			), nil
 		},
+
+		// Pin the accepted algorithm explicitly rather than trusting
+		// whatever the token itself claims - defense against algorithm
+		// confusion attacks, even though this app only ever issues HS256
+		// tokens today.
+		jwt.WithValidMethods([]string{"HS256"}),
 	)
 
 	if err != nil {

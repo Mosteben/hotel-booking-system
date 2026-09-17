@@ -7,9 +7,12 @@ import (
 
 type ReviewRepository interface {
 	Create(review *model.Review) error
+	GetAll() ([]model.Review, error)
+	GetByID(id uint) (*model.Review, error)
 	GetByHotelID(hotelID uint) ([]model.Review, error)
 	GetByUserAndHotel(userID string, hotelID uint) (*model.Review, error)
 	GetAverageRating(hotelID uint) (float64, error)
+	Delete(id uint) error
 }
 
 type reviewRepository struct {
@@ -24,6 +27,31 @@ func NewReviewRepository(db *gorm.DB) ReviewRepository {
 
 func (r *reviewRepository) Create(review *model.Review) error {
 	return r.db.Create(review).Error
+}
+
+func (r *reviewRepository) GetAll() ([]model.Review, error) {
+	var reviews []model.Review
+
+	err := r.db.
+		Order("created_at DESC").
+		Find(&reviews).Error
+
+	return reviews, err
+}
+
+func (r *reviewRepository) GetByID(id uint) (*model.Review, error) {
+	var review model.Review
+
+	err := r.db.First(&review, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &review, nil
+}
+
+func (r *reviewRepository) Delete(id uint) error {
+	return r.db.Delete(&model.Review{}, id).Error
 }
 
 func (r *reviewRepository) GetByHotelID(

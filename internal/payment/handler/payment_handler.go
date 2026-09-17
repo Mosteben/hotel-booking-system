@@ -7,6 +7,7 @@ import (
 
 	"github.com/Mosteben/hotel-booking-system/internal/payment/model"
 	"github.com/Mosteben/hotel-booking-system/internal/payment/service"
+	"github.com/Mosteben/hotel-booking-system/pkg/response"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -85,7 +86,7 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "invalid payment data",
-			"error":   err.Error(),
+			"error":   response.InvalidRequestMessage,
 		})
 		return
 	}
@@ -185,7 +186,7 @@ func (h *PaymentHandler) GetPaymentByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "failed to get payment",
-			"error":   err.Error(),
+			"error":   response.SanitizedError("GetPaymentByID", err),
 		})
 		return
 	}
@@ -273,7 +274,7 @@ func (h *PaymentHandler) GetMyPayments(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "failed to get payments",
-			"error":   err.Error(),
+			"error":   response.SanitizedError("GetMyPayments", err),
 		})
 		return
 	}
@@ -308,7 +309,7 @@ func (h *PaymentHandler) GetAllPayments(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "failed to get payments",
-			"error":   err.Error(),
+			"error":   response.SanitizedError("GetAllPayments", err),
 		})
 		return
 	}
@@ -364,7 +365,7 @@ func (h *PaymentHandler) UpdatePaymentStatus(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "invalid payment status data",
-			"error":   err.Error(),
+			"error":   response.InvalidRequestMessage,
 		})
 		return
 	}
@@ -405,7 +406,7 @@ func (h *PaymentHandler) UpdatePaymentStatus(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "payment status updated but failed to retrieve payment",
-			"error":   err.Error(),
+			"error":   response.SanitizedError("UpdatePaymentStatus", err),
 		})
 		return
 	}

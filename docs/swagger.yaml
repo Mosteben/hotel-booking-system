@@ -1,0 +1,1637 @@
+basePath: /
+definitions:
+  github_com_Mosteben_hotel-booking-system_internal_auth_model.ChangePasswordRequest:
+    properties:
+      confirm_password:
+        type: string
+      current_password:
+        type: string
+      new_password:
+        minLength: 8
+        type: string
+    required:
+    - confirm_password
+    - current_password
+    - new_password
+    type: object
+  github_com_Mosteben_hotel-booking-system_internal_auth_model.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  github_com_Mosteben_hotel-booking-system_internal_auth_model.RegisterRequest:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      confirm_password:
+        type: string
+      country:
+        type: string
+      date_of_birth:
+        type: string
+      email:
+        type: string
+      first_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        type: string
+      last_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      national_id:
+        type: string
+      nationality:
+        type: string
+      passport_number:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phone:
+        type: string
+      postal_code:
+        type: string
+      state:
+        type: string
+    required:
+    - address
+    - city
+    - confirm_password
+    - country
+    - date_of_birth
+    - email
+    - first_name
+    - gender
+    - last_name
+    - nationality
+    - password
+    - phone
+    type: object
+  github_com_Mosteben_hotel-booking-system_internal_auth_model.UpdateProfileRequest:
+    properties:
+      address:
+        maxLength: 255
+        type: string
+      city:
+        maxLength: 100
+        type: string
+      country:
+        maxLength: 100
+        type: string
+      first_name:
+        maxLength: 50
+        minLength: 2
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        type: string
+      last_name:
+        maxLength: 50
+        minLength: 2
+        type: string
+      national_id:
+        maxLength: 50
+        type: string
+      nationality:
+        maxLength: 100
+        type: string
+      passport_number:
+        maxLength: 50
+        type: string
+      phone:
+        maxLength: 20
+        minLength: 10
+        type: string
+      postal_code:
+        maxLength: 20
+        type: string
+      state:
+        maxLength: 100
+        type: string
+    type: object
+  github_com_Mosteben_hotel-booking-system_internal_booking_model.Booking:
+    properties:
+      check_in:
+        type: string
+      check_out:
+        type: string
+      created_at:
+        type: string
+      guests:
+        type: integer
+      id:
+        type: integer
+      room_id:
+        type: integer
+      status:
+        type: string
+      total_price:
+        type: number
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  github_com_Mosteben_hotel-booking-system_internal_hotel_model.Hotel:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      country:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+      rooms:
+        items:
+          $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_room_model.Room'
+        type: array
+      stars:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  github_com_Mosteben_hotel-booking-system_internal_room_model.Room:
+    properties:
+      capacity:
+        type: integer
+      created_at:
+        type: string
+      description:
+        type: string
+      hotel_id:
+        type: integer
+      id:
+        type: integer
+      price_per_night:
+        type: number
+      room_number:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: |-
+    RESTful API for a Hotel Booking System built with Go, Gin, GORM, PostgreSQL, and JWT authentication.
+
+    Features include authentication, hotel management, room management, bookings, availability, reviews, favorites, and payments.
+  title: Hotel Booking System API
+  version: "1.0"
+paths:
+  /auth/change-password:
+    put:
+      consumes:
+      - application/json
+      description: Change the authenticated user's password.
+      parameters:
+      - description: Password change data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_auth_model.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password changed successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: User not authenticated
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Change password
+      tags:
+      - Authentication
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user and return a JWT token.
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_auth_model.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Invalid credentials
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Login user
+      tags:
+      - Authentication
+  /auth/me:
+    get:
+      description: Return the authenticated user's information and profile.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Current user
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: User not authenticated
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - Authentication
+  /auth/profile:
+    put:
+      consumes:
+      - application/json
+      description: Update the authenticated user's profile information.
+      parameters:
+      - description: Profile update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_auth_model.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: User not authenticated
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - Authentication
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account with profile information.
+      parameters:
+      - description: Registration data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_auth_model.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Validation failed
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register a new user
+      tags:
+      - Authentication
+  /bookings:
+    get:
+      description: Get all bookings. Admin and manager users only.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_booking_model.Booking'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all bookings
+      tags:
+      - Bookings
+    post:
+      consumes:
+      - application/json
+      description: Create a new hotel room booking for the authenticated user.
+      parameters:
+      - description: Booking data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_booking_model.Booking'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_booking_model.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a booking
+      tags:
+      - Bookings
+  /bookings/{id}:
+    delete:
+      description: Cancel an existing booking belonging to the authenticated user.
+        The booking is marked as cancelled instead of being deleted.
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cancel a booking
+      tags:
+      - Bookings
+    get:
+      description: Get a booking by ID. Customers can only view their own bookings,
+        while admins and managers can view any booking.
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_booking_model.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get booking by ID
+      tags:
+      - Bookings
+    put:
+      consumes:
+      - application/json
+      description: Update an existing booking. Customers can only update their own
+        bookings.
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated booking data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_booking_model.Booking'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_booking_model.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a booking
+      tags:
+      - Bookings
+  /bookings/{id}/payment:
+    post:
+      consumes:
+      - application/json
+      description: Creates a payment for the authenticated user's booking.
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Payment data
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            payment_method:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create payment
+      tags:
+      - Payments
+  /bookings/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Confirm or cancel a booking. Admin and manager users only.
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Booking status
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            status:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_booking_model.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update booking status
+      tags:
+      - Bookings
+  /bookings/my:
+    get:
+      description: Get all bookings belonging to the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_booking_model.Booking'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get my bookings
+      tags:
+      - Bookings
+  /favorites:
+    get:
+      description: Get all hotels saved as favorites by the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get my favorite hotels
+      tags:
+      - Favorites
+  /hotels:
+    get:
+      description: Retrieve all hotels.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hotels retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to get hotels
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all hotels
+      tags:
+      - Hotels
+    post:
+      consumes:
+      - application/json
+      description: Create a new hotel.
+      parameters:
+      - description: Hotel data
+        in: body
+        name: hotel
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_hotel_model.Hotel'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Hotel created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid hotel data or validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: User not authenticated
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a hotel
+      tags:
+      - Hotels
+  /hotels/{hotel_id}/rooms:
+    get:
+      description: Retrieve all rooms belonging to a specific hotel.
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: hotel_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Rooms retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid hotel ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to get rooms
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get rooms by hotel ID
+      tags:
+      - Rooms
+    post:
+      consumes:
+      - application/json
+      description: Create a new room for a hotel.
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: hotel_id
+        required: true
+        type: integer
+      - description: Room data
+        in: body
+        name: room
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_room_model.Room'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Room created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid hotel ID, request body, or validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: User not authenticated
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Hotel not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a room
+      tags:
+      - Rooms
+  /hotels/{id}:
+    delete:
+      description: Delete an existing hotel.
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hotel deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid hotel ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: User not authenticated
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Hotel not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete hotel
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a hotel
+      tags:
+      - Hotels
+    get:
+      description: Retrieve a hotel using its ID.
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hotel retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid hotel ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Hotel not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to get hotel
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get hotel by ID
+      tags:
+      - Hotels
+    put:
+      consumes:
+      - application/json
+      description: Update an existing hotel.
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated hotel data
+        in: body
+        name: hotel
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_hotel_model.Hotel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hotel updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid hotel data or validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: User not authenticated
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Hotel not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a hotel
+      tags:
+      - Hotels
+  /hotels/{id}/details:
+    get:
+      description: Retrieve a hotel with all of its rooms.
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hotel details retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid hotel ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Hotel not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to get hotel details
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get hotel details
+      tags:
+      - Hotels
+  /hotels/{id}/favorite:
+    delete:
+      description: Remove a hotel from the authenticated user's favorites.
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove hotel from favorites
+      tags:
+      - Favorites
+    post:
+      description: Add a hotel to the authenticated user's favorites.
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add hotel to favorites
+      tags:
+      - Favorites
+  /hotels/{id}/rating:
+    get:
+      description: Get the average rating of a specific hotel based on submitted reviews.
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get hotel average rating
+      tags:
+      - Reviews
+  /hotels/{id}/reviews:
+    get:
+      description: Get all reviews submitted for a specific hotel.
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get hotel reviews
+      tags:
+      - Reviews
+    post:
+      consumes:
+      - application/json
+      description: Create a review and rating for a hotel. The authenticated user
+        can submit one review per hotel.
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Review data
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            comment:
+              type: string
+            rating:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a hotel review
+      tags:
+      - Reviews
+  /hotels/search:
+    get:
+      description: Search hotels using hotel and room filters.
+      parameters:
+      - description: Hotel name
+        in: query
+        name: name
+        type: string
+      - description: City
+        in: query
+        name: city
+        type: string
+      - description: Country
+        in: query
+        name: country
+        type: string
+      - description: Hotel star rating
+        in: query
+        name: stars
+        type: integer
+      - description: Minimum room price
+        in: query
+        name: min_price
+        type: number
+      - description: Maximum room price
+        in: query
+        name: max_price
+        type: number
+      - description: Room type
+        in: query
+        name: room_type
+        type: string
+      - description: Minimum room capacity
+        in: query
+        name: min_capacity
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hotel search completed successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid search parameters
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Search hotels
+      tags:
+      - Hotels
+  /payments:
+    get:
+      description: Retrieves all payments. Admin and manager only.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all payments
+      tags:
+      - Payments
+  /payments/{id}:
+    get:
+      description: Retrieves a payment by ID. Customers can only access their own
+        payments. Admins and managers can access any payment.
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get payment by ID
+      tags:
+      - Payments
+  /payments/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Updates a payment status. Admin and manager only. Supported statuses
+        are paid, failed, and refunded.
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Payment status
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            status:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update payment status
+      tags:
+      - Payments
+  /payments/my:
+    get:
+      description: Retrieves all payments belonging to the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get my payments
+      tags:
+      - Payments
+  /rooms/{id}:
+    delete:
+      description: Delete an existing room.
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Room deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid room ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: User not authenticated
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Room not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to delete room
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a room
+      tags:
+      - Rooms
+    get:
+      description: Retrieve a room using its ID.
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Room retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid room ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Room not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to get room
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get room by ID
+      tags:
+      - Rooms
+    put:
+      consumes:
+      - application/json
+      description: Update an existing room.
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated room data
+        in: body
+        name: room
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Mosteben_hotel-booking-system_internal_room_model.Room'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Room updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid room ID, request body, or validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: User not authenticated
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Room not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a room
+      tags:
+      - Rooms
+  /rooms/{id}/availability:
+    get:
+      description: Check whether a room is available for the specified date range.
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Check-in date in YYYY-MM-DD format
+        in: query
+        name: check_in
+        required: true
+        type: string
+      - description: Check-out date in YYYY-MM-DD format
+        in: query
+        name: check_out
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Check room availability
+      tags:
+      - Room Availability
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

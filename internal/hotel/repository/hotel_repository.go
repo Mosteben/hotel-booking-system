@@ -11,9 +11,25 @@ type HotelRepository interface {
 	Create(hotel *model.Hotel) error
 	GetAll() ([]model.Hotel, error)
 	GetByID(id uint) (*model.Hotel, error)
+	GetDetails(id uint) (*model.Hotel, error)
 	Update(hotel *model.Hotel) error
 	Delete(id uint) error
 	Search(filters *model.SearchRequest) ([]model.Hotel, error)
+
+	// GetByIDs batch-fetches hotels (no image preload - name/id only) for
+	// Admin DTO resolution, so those don't do one query per row.
+	GetByIDs(ids []uint) ([]model.Hotel, error)
+
+	CreateImage(image *model.HotelImage) error
+	GetImageByID(id uint) (*model.HotelImage, error)
+	GetImagesByHotelID(hotelID uint) ([]model.HotelImage, error)
+	CountImagesByHotelID(hotelID uint) (int64, error)
+	DeleteImage(id uint) error
+	UnsetMainImage(hotelID uint) error
+	SetMainImage(id uint) error
+
+	// Create a repository that uses the provided transaction.
+	WithTx(tx *gorm.DB) HotelRepository
 }
 
 type hotelRepository struct {
@@ -26,6 +42,14 @@ func NewHotelRepository(db *gorm.DB) HotelRepository {
 	}
 }
 
+func (r *hotelRepository) WithTx(
+	tx *gorm.DB,
+) HotelRepository {
+	return &hotelRepository{
+		db: tx,
+	}
+}
+
 func (r *hotelRepository) Create(hotel *model.Hotel) error {
 	return r.db.Create(hotel).Error
 }
@@ -34,7 +58,22 @@ func (r *hotelRepository) GetAll() ([]model.Hotel, error) {
 	var hotels []model.Hotel
 
 	err := r.db.
+		Preload("Images").
 		Order("id DESC").
+		Find(&hotels).Error
+
+	return hotels, err
+}
+
+func (r *hotelRepository) GetByIDs(ids []uint) ([]model.Hotel, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	var hotels []model.Hotel
+
+	err := r.db.
+		Where("id IN ?", ids).
 		Find(&hotels).Error
 
 	return hotels, err
@@ -43,7 +82,25 @@ func (r *hotelRepository) GetAll() ([]model.Hotel, error) {
 func (r *hotelRepository) GetByID(id uint) (*model.Hotel, error) {
 	var hotel model.Hotel
 
-	err := r.db.First(&hotel, id).Error
+	err := r.db.
+		Preload("Images").
+		First(&hotel, id).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &hotel, nil
+}
+
+func (r *hotelRepository) GetDetails(id uint) (*model.Hotel, error) {
+	var hotel model.Hotel
+
+	err := r.db.
+		Preload("Rooms.Images").
+		Preload("Images").
+		First(&hotel, id).Error
+
 	if err != nil {
 		return nil, err
 	}
@@ -135,8 +192,74 @@ func (r *hotelRepository) Search(
 	}
 
 	err := query.
+		Preload("Images").
 		Order("hotels.id DESC").
 		Find(&hotels).Error
 
 	return hotels, err
+}
+
+// =========================
+// Hotel Images
+// =========================
+
+func (r *hotelRepository) CreateImage(image *model.HotelImage) error {
+	return r.db.Create(image).Error
+}
+
+func (r *hotelRepository) GetImageByID(id uint) (*model.HotelImage, error) {
+	var image model.HotelImage
+
+	err := r.db.First(&image, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &image, nil
+}
+
+func (r *hotelRepository) GetImagesByHotelID(
+	hotelID uint,
+) ([]model.HotelImage, error) {
+
+	var images []model.HotelImage
+
+	err := r.db.
+		Where("hotel_id = ?", hotelID).
+		Order("id ASC").
+		Find(&images).Error
+
+	return images, err
+}
+
+func (r *hotelRepository) CountImagesByHotelID(
+	hotelID uint,
+) (int64, error) {
+
+	var count int64
+
+	err := r.db.
+		Model(&model.HotelImage{}).
+		Where("hotel_id = ?", hotelID).
+		Count(&count).Error
+
+	return count, err
+}
+
+func (r *hotelRepository) DeleteImage(id uint) error {
+	return r.db.Delete(&model.HotelImage{}, id).Error
+}
+
+func (r *hotelRepository) UnsetMainImage(hotelID uint) error {
+	return r.db.
+		Model(&model.HotelImage{}).
+		Where("hotel_id = ? AND is_main = ?", hotelID, true).
+		Update("is_main", false).Error
+}
+
+func (r *hotelRepository) SetMainImage(id uint) error {
+	return r.db.
+		Model(&model.HotelImage{}).
+		Where("id = ?", id).
+		Update("is_main", true).Error
 }
