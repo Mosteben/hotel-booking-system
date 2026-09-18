@@ -71,22 +71,14 @@ export function Login() {
           error={fieldErrors.email}
         />
 
-        <div className="flex flex-col gap-1.5">
-          <PasswordField
-            label="Password"
-            autoComplete="current-password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={fieldErrors.password}
-          />
-          <Link
-            to="/forgot-password"
-            className="self-end text-xs font-semibold text-teal transition-colors duration-200 hover:text-teal-dark"
-          >
-            Forgot password?
-          </Link>
-        </div>
+        <PasswordField
+          label="Password"
+          autoComplete="current-password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={fieldErrors.password}
+        />
 
         {formError && (
           <p

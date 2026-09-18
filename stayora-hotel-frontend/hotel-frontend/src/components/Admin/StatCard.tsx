@@ -14,14 +14,22 @@ export function StatCard({
   value,
   icon: Icon,
   tone = "default",
+  delay = 0,
 }: {
   label: string;
   value: string | number;
   icon: LucideIcon;
   tone?: Tone;
+  // Optional stagger delay (ms) for the entrance animation - lets a fixed
+  // dashboard grid of individually-written <StatCard/> calls stagger in
+  // without each needing a .map() index.
+  delay?: number;
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-[16px] border border-line bg-white p-5">
+    <div
+      className="card-enter flex items-center gap-4 rounded-card border border-line bg-white p-5 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-hover)]"
+      style={{ animationDelay: `${delay}ms` }}
+    >
       <span
         className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] ${TONE_STYLES[tone]}`}
       >

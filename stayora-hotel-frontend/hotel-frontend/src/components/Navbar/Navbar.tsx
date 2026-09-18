@@ -38,7 +38,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-30 px-4 pt-4 sm:px-6 sm:pt-6">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-pill border border-line bg-white/90 px-4 py-2.5 shadow-[0_8px_30px_rgba(11,63,66,0.06)] backdrop-blur sm:px-6 sm:py-3">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-pill border border-line bg-white/90 px-4 py-2.5 shadow-[var(--shadow-card)] backdrop-blur sm:px-6 sm:py-3">
         <Link to="/">
           <Logo />
         </Link>
@@ -102,7 +102,7 @@ export function Navbar() {
               </button>
               <button
                 onClick={() => navigate("/login")}
-                className="rounded-pill bg-teal px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-dark cursor-pointer"
+                className="rounded-pill bg-teal px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-teal-dark active:scale-[0.97] cursor-pointer"
               >
                 Login
               </button>
@@ -119,8 +119,20 @@ export function Navbar() {
         </button>
       </nav>
 
-      {open && (
-        <div className="mx-auto mt-2 max-w-6xl rounded-card border border-line bg-white p-5 shadow-lg md:hidden">
+      {/* Always mounted (never `{open && ...}`) so the grid-rows trick can
+          transition it smoothly - conditional mounting would just make it
+          snap open/closed with no animation at all. `pointer-events: none`
+          (in index.css) keeps a closed-but-still-mounted menu from
+          intercepting mouse clicks, but that alone does nothing for
+          keyboard users - without `inert`, Tab could still walk a
+          sighted-but-invisible keyboard user straight into these links
+          while the menu is visually closed. `inert` removes it from the
+          tab order and from assistive tech entirely while closed. */}
+      <div
+        className={`mobile-menu-rows md:hidden ${open ? "mobile-menu-open" : ""}`}
+        inert={!open}
+      >
+        <div className="mx-auto mt-2 max-w-6xl rounded-card border border-line bg-white p-5 shadow-lg">
           {isAuthenticated ? (
             <>
               <div className="flex items-center gap-3 border-b border-line pb-4">
@@ -200,7 +212,7 @@ export function Navbar() {
             </div>
           )}
         </div>
-      )}
+      </div>
     </header>
   );
 }

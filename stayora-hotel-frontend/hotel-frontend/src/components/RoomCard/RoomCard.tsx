@@ -23,13 +23,13 @@ export function RoomCard({
   const imageUrl = !imageFailed ? room.image_url : null;
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-card bg-white shadow-[0_8px_24px_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_16px_36px_rgba(16,24,40,0.12)] sm:flex-row">
-      <div className="h-32 w-full shrink-0 overflow-hidden bg-cream sm:h-auto sm:w-40">
+    <article className="group flex flex-col overflow-hidden rounded-card border border-line bg-white shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-hover)] sm:flex-row">
+      <div className="h-44 w-full shrink-0 overflow-hidden bg-cream sm:h-auto sm:w-56">
         {imageUrl ? (
           <img
             src={imageUrl}
             alt={`${room.type} · Room ${room.room_number}`}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             onError={() => setImageFailed(true)}
           />
         ) : (
@@ -66,14 +66,14 @@ export function RoomCard({
         </div>
 
         <div className="flex shrink-0 items-center justify-between gap-4 sm:flex-col sm:items-end sm:justify-center sm:gap-4">
-          <p className="font-display text-lg font-bold text-ink">
+          <p className="font-display text-lg font-bold text-gold">
             ${room.price_per_night.toFixed(2)}
             <span className="text-sm font-normal text-muted"> / night</span>
           </p>
           <button
             onClick={() => onBook(room)}
             disabled={!isBookable}
-            className="rounded-pill bg-teal px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-dark disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            className="rounded-pill bg-teal px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-teal-dark active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 cursor-pointer"
           >
             {isBookable ? "Select room" : "Unavailable"}
           </button>

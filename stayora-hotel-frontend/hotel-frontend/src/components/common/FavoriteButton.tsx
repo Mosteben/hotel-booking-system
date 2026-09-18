@@ -19,6 +19,7 @@ export function FavoriteButton({
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [justToggled, setJustToggled] = useState(false);
 
   async function toggle(e: React.MouseEvent) {
     e.preventDefault();
@@ -36,6 +37,8 @@ export function FavoriteButton({
         : await addFavorite(hotelId);
       if (response.success) {
         onChange(!isFavorite);
+        setJustToggled(true);
+        setTimeout(() => setJustToggled(false), 300);
       } else {
         // The request completed but the backend rejected it - surface that
         // instead of pretending the toggle worked.
@@ -60,7 +63,9 @@ export function FavoriteButton({
       aria-pressed={isFavorite}
       aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
       title={hasError ? "Couldn't update favorites - try again" : undefined}
-      className={`flex ${dimension} shrink-0 items-center justify-center rounded-full border shadow-sm transition-colors cursor-pointer disabled:cursor-not-allowed ${
+      className={`flex ${dimension} shrink-0 items-center justify-center rounded-full border shadow-sm transition-all duration-150 hover:scale-105 active:scale-95 cursor-pointer disabled:cursor-not-allowed disabled:hover:scale-100 ${
+        justToggled ? "favorite-pop" : ""
+      } ${
         hasError
           ? "border-amber-200 bg-amber-50 text-amber-600"
           : isFavorite

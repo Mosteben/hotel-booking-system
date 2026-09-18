@@ -3,13 +3,15 @@ import { Link } from "react-router-dom";
 import {
   BedDouble,
   CalendarDays,
-  TriangleAlert,
   CalendarX,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { PageHeading } from "@/components/common/PageHeading";
+import { EmptyState } from "@/components/common/EmptyState";
+import { ErrorState } from "@/components/common/ErrorState";
+import { Skeleton } from "@/components/common/Skeleton";
 import { getMyBookings, cancelBooking } from "@/api/bookingApi";
 import { getRoomByID } from "@/api/roomApi";
 import { getHotelByID } from "@/api/hotelApi";
@@ -40,21 +42,21 @@ function groupOf(booking: Booking): Group {
 function BookingCardSkeleton() {
   return (
     <div className="flex flex-col gap-6 rounded-card border border-line bg-white p-7 sm:p-8 lg:grid lg:grid-cols-[160px_1fr_200px] lg:gap-8">
-      <div className="h-40 w-full animate-pulse rounded-[16px] bg-line lg:h-auto" />
+      <Skeleton className="h-40 w-full rounded-[16px] lg:h-auto" />
       <div className="flex flex-col gap-4 lg:border-l lg:border-line lg:pl-8">
         <div className="flex flex-col gap-2">
-          <div className="h-5 w-48 animate-pulse rounded bg-line" />
-          <div className="h-3 w-32 animate-pulse rounded bg-line" />
+          <Skeleton className="h-5 w-48" />
+          <Skeleton className="h-3 w-32" />
         </div>
         <div className="flex flex-wrap gap-6">
-          <div className="h-10 w-24 animate-pulse rounded bg-line" />
-          <div className="h-10 w-24 animate-pulse rounded bg-line" />
-          <div className="h-10 w-20 animate-pulse rounded bg-line" />
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-20" />
         </div>
       </div>
       <div className="flex flex-col justify-between gap-4 lg:border-l lg:border-line lg:pl-8">
-        <div className="h-8 w-24 animate-pulse rounded bg-line" />
-        <div className="h-10 w-full animate-pulse rounded-pill bg-line" />
+        <Skeleton className="h-8 w-24" />
+        <Skeleton className="h-10 w-full rounded-pill" />
       </div>
     </div>
   );
@@ -192,40 +194,30 @@ export function MyBookings() {
         )}
 
         {status === "error" && (
-          <div className="mt-10 flex flex-col items-center gap-3 rounded-panel border border-line bg-white px-6 py-16 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-500">
-              <TriangleAlert size={22} />
-            </span>
-            <p className="font-display text-lg font-semibold text-ink">
-              Couldn't load your bookings
-            </p>
-            <p className="max-w-sm text-sm text-muted">{errorMessage}</p>
-            <button
-              onClick={load}
-              className="mt-2 rounded-pill bg-teal px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-dark cursor-pointer"
-            >
-              Try again
-            </button>
+          <div className="mt-10">
+            <ErrorState
+              title="Couldn't load your bookings"
+              message={errorMessage}
+              onRetry={load}
+            />
           </div>
         )}
 
         {status === "empty" && (
-          <div className="mt-10 flex flex-col items-center gap-3 rounded-panel border border-dashed border-line bg-white px-6 py-16 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-bg text-teal">
-              <CalendarX size={22} />
-            </span>
-            <p className="font-display text-lg font-semibold text-ink">
-              No bookings yet
-            </p>
-            <p className="max-w-sm text-sm text-muted">
-              Once you book a stay, it'll show up here.
-            </p>
-            <Link
-              to="/"
-              className="mt-2 rounded-pill bg-teal px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-dark"
-            >
-              Browse hotels
-            </Link>
+          <div className="mt-10">
+            <EmptyState
+              icon={CalendarX}
+              title="No bookings yet"
+              description="Once you book a stay, it'll show up here."
+              action={
+                <Link
+                  to="/"
+                  className="mt-2 rounded-pill bg-teal px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-dark"
+                >
+                  Browse hotels
+                </Link>
+              }
+            />
           </div>
         )}
 
@@ -248,14 +240,15 @@ export function MyBookings() {
             </div>
 
             {visible.length === 0 ? (
-              <div className="mt-6 flex flex-col items-center gap-2 rounded-panel border border-dashed border-line bg-white px-6 py-14 text-center">
-                <p className="text-sm text-muted">
-                  No {activeGroup} bookings.
-                </p>
+              <div className="mt-6">
+                <EmptyState
+                  icon={CalendarX}
+                  title={`No ${activeGroup} bookings`}
+                />
               </div>
             ) : (
               <div className="mt-8 flex flex-col gap-6">
-                {visible.map(({ booking, room, hotel, payment }) => {
+                {visible.map(({ booking, room, hotel, payment }, i) => {
                   const isCancellable =
                     booking.status === "pending" || booking.status === "confirmed";
                   // Prefer the actual room's own photo - it's what the
@@ -266,7 +259,8 @@ export function MyBookings() {
                   return (
                     <article
                       key={booking.id}
-                      className="flex flex-col gap-6 rounded-card border border-line bg-white p-7 shadow-[0_8px_24px_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_16px_36px_rgba(16,24,40,0.1)] sm:p-8 lg:grid lg:grid-cols-[160px_1fr_200px] lg:items-stretch lg:gap-8"
+                      className="card-enter flex flex-col gap-6 rounded-card border border-line bg-white p-7 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-hover)] sm:p-8 lg:grid lg:grid-cols-[160px_1fr_200px] lg:items-stretch lg:gap-8"
+                      style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}
                     >
                       {/* Zone 1: image */}
                       <Link
@@ -340,7 +334,7 @@ export function MyBookings() {
                           <p className="text-xs font-medium uppercase tracking-wide text-muted">
                             Total price
                           </p>
-                          <p className="mt-1 font-display text-2xl font-bold text-ink">
+                          <p className="mt-1 font-display text-2xl font-bold text-gold">
                             ${booking.total_price.toFixed(2)}
                           </p>
                         </div>

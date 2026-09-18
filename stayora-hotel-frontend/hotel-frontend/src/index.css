@@ -5,22 +5,82 @@
   --font-display: "Manrope", "Inter", sans-serif;
   --font-sans: "Inter", "Manrope", sans-serif;
 
-  /* Pure light-blue accent instead of teal, pure white background */
-  --color-teal: #2f6fed; /* primary blue — buttons, links */
-  --color-teal-dark: #1d4fd1; /* hover / active state */
-  --color-teal-light: #5b93f5; /* light accents, small labels */
-  --color-bg: #ffffff; /* pure white page background */
-  --color-ink: #101828; /* near-black navy for headings/body text */
-  --color-muted: #667085; /* neutral gray for secondary text */
-  --color-line: #e6e9f0; /* soft cool-gray borders */
+  /* ============================================================
+     Design tokens - approved NileStay "Burnt Orange" palette.
+     Token NAMES are unchanged from before (bg, ink, muted, line,
+     teal, teal-dark, teal-light, cream, cream-dark, gold) so every
+     existing bg-teal / text-ink / etc. utility class across the app
+     keeps working - only the VALUES map onto the approved hex
+     values below. This file is the single place the whole app's
+     look is tuned from.
+     ============================================================ */
 
-  --color-cream: #eaf1ff; /* light blue-tinted surface, replaces cream */
-  --color-cream-dark: #d7e5ff;
-  --color-gold: #2f6fed; /* kept name for compatibility, now blue */
+  /* Primary: Burnt Orange - buttons, links, focus rings, active nav
+     state, CTAs. Used deliberately, not as a page-wide wash. */
+  --color-teal: #c65d21; /* Primary */
+  --color-teal-dark: #a94b18; /* Primary Hover */
+  --color-teal-light: #d98a54; /* lighter tint for decorative accents (e.g. hero blobs) */
 
-  --radius-panel: 32px;
-  --radius-card: 24px;
+  --color-bg: #faf9f6; /* Background */
+  --color-ink: #1f2933; /* Text */
+  --color-muted: #667085; /* Secondary Text */
+  --color-line: #e7e2dc; /* Border */
+
+  --color-cream: #f4e1d4; /* Primary Soft - the "very subtle Burnt Orange tint" for section backgrounds */
+  --color-cream-dark: #ead0bc;
+
+  /* Ratings/price emphasis reuse the same Primary accent (no separate
+     hue) - restrained by being used only on these specific small
+     elements, never as a background wash. */
+  --color-gold: #c65d21;
+  --color-gold-light: #f4e1d4;
+
+  --color-success: #2f6b4f;
+  --color-success-soft: #e7f0ea;
+  --color-error: #b42318;
+  --color-error-soft: #fbeae8;
+
+  /* Admin Sidebar - dedicated tokens (not reused generic site tokens)
+     so its hover/active/text states can be tuned independently of the
+     rest of the app. Background/active values happen to equal --color-ink
+     and --color-teal today, but are their own tokens on purpose. */
+  --color-admin-sidebar-bg: #1f2933;
+  --color-admin-sidebar-hover: #2b3742;
+  --color-admin-sidebar-active: #c65d21;
+  --color-admin-sidebar-active-hover: #a94b18;
+  --color-admin-sidebar-text: #f8fafc;
+  --color-admin-sidebar-text-secondary: #aab4be;
+
+  /* Restrained radius scale - avoids "huge rounded cards everywhere". */
+  --radius-panel: 24px;
+  --radius-card: 16px;
   --radius-pill: 999px;
+
+  /* Elevation scale - resting / hover-lift / modal. Used via
+     shadow-[var(--shadow-*)] instead of one-off shadow values. */
+  --shadow-card: 0 1px 2px rgba(31, 41, 51, 0.04), 0 8px 24px -12px rgba(31, 41, 51, 0.12);
+  --shadow-hover: 0 4px 8px rgba(31, 41, 51, 0.04), 0 16px 36px -12px rgba(31, 41, 51, 0.18);
+  --shadow-modal: 0 24px 64px -16px rgba(31, 41, 51, 0.35);
+}
+
+/* ============================================================
+   Global motion safety net.
+   Every animation/transition added below (and every Tailwind
+   transition-* utility used across the app) is covered by this one
+   rule, rather than needing an individual prefers-reduced-motion
+   override per component. Durations collapse to near-zero and
+   iteration counts to 1, which effectively disables non-essential
+   motion without having to delete the animation/transition itself.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ============ Auth pages: thin scroll + entrance animations ============ */
@@ -140,4 +200,143 @@
   .page-fade-in {
     animation: none;
   }
+}
+
+/* ============ Card / list-item entrance (stagger via inline
+   animation-delay set per item, see Skeleton/HotelCard/RoomCard
+   call sites) ============ */
+
+@keyframes card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.card-enter {
+  animation: card-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ============ Skeleton shimmer ============ */
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -150% 0;
+  }
+  100% {
+    background-position: 150% 0;
+  }
+}
+.skeleton-shimmer {
+  background-color: var(--color-line);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.65) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+/* ============ Modal / dialog enter + exit ============ */
+
+@keyframes modal-backdrop-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes modal-backdrop-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes modal-panel-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes modal-panel-out {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.97) translateY(4px);
+  }
+}
+.modal-backdrop-in {
+  animation: modal-backdrop-in 0.2s ease-out both;
+}
+.modal-backdrop-out {
+  animation: modal-backdrop-out 0.18s ease-in both;
+}
+.modal-panel-in {
+  animation: modal-panel-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.modal-panel-out {
+  animation: modal-panel-out 0.16s ease-in both;
+}
+
+/* ============ Favorite toggle "pop" ============ */
+
+@keyframes favorite-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.favorite-pop {
+  animation: favorite-pop 0.28s ease-out both;
+}
+
+/* ============ Mobile menu (Navbar) ============
+   Height animates via the CSS grid-rows trick (0fr -> 1fr) so it
+   works smoothly without knowing the panel's real height up front -
+   the element stays mounted at all times, just collapsed to zero
+   rows, so no JS mount/unmount timing is needed. */
+
+.mobile-menu-rows {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  /* Explicit safety net, not just relying on the 0fr row collapsing to
+     zero height: while closed, this panel (and everything in it -
+     nav links, logout button) must never intercept a click/tap, even
+     mid-transition or in a browser that doesn't collapse the grid
+     track to exactly 0px. This is what actually guarantees "closing
+     the menu doesn't leave an invisible overlay blocking clicks",
+     rather than just hoping the height/opacity happens to be enough. */
+  pointer-events: none;
+  transition: grid-template-rows 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s ease;
+}
+.mobile-menu-rows.mobile-menu-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  pointer-events: auto;
+}
+.mobile-menu-rows > * {
+  min-height: 0;
+  overflow: hidden;
 }

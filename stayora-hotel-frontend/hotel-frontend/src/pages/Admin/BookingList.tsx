@@ -208,7 +208,7 @@ export function BookingList() {
               return (
                 <div
                   key={booking.id}
-                  className={`flex flex-col gap-4 rounded-[14px] border bg-white p-4 sm:flex-row sm:items-center ${
+                  className={`flex flex-col gap-4 rounded-[14px] border bg-white p-4 transition-shadow duration-200 hover:shadow-[var(--shadow-card)] sm:flex-row sm:items-center ${
                     booking.status === "pending" ? "border-amber-200" : "border-line"
                   }`}
                 >

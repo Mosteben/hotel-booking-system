@@ -18,6 +18,7 @@ import { StatCard } from "@/components/Admin/StatCard";
 import { AdminPageHeader } from "@/components/Admin/AdminPageHeader";
 import { AdminErrorState, AdminLoadingRows } from "@/components/Admin/AdminStates";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { Skeleton } from "@/components/common/Skeleton";
 
 type Severity = "critical" | "warning" | "info";
 
@@ -175,7 +176,7 @@ export function Overview() {
         <AdminPageHeader title="Overview" />
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-24 animate-pulse rounded-[16px] bg-line/60" />
+            <Skeleton key={i} className="h-24 rounded-card" />
           ))}
         </div>
         <div className="mt-8">
@@ -225,27 +226,29 @@ export function Overview() {
       )}
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        <StatCard label="Total bookings" value={stats.totalBookings} icon={ClipboardList} />
+        <StatCard label="Total bookings" value={stats.totalBookings} icon={ClipboardList} delay={0} />
         <StatCard
           label="Pending bookings"
           value={stats.pendingBookings}
           icon={CalendarClock}
           tone={stats.pendingBookings > 0 ? "warning" : "default"}
+          delay={40}
         />
-        <StatCard label="Confirmed" value={stats.confirmedBookings} icon={CheckCircle2} tone="success" />
-        <StatCard label="Cancelled" value={stats.cancelledBookings} icon={XCircle} />
+        <StatCard label="Confirmed" value={stats.confirmedBookings} icon={CheckCircle2} tone="success" delay={80} />
+        <StatCard label="Cancelled" value={stats.cancelledBookings} icon={XCircle} delay={120} />
 
-        <StatCard label="Paid payments" value={stats.paidPayments} icon={Banknote} tone="success" />
+        <StatCard label="Paid payments" value={stats.paidPayments} icon={Banknote} tone="success" delay={160} />
         <StatCard
           label="Failed payments"
           value={stats.failedPayments}
           icon={XCircle}
           tone={stats.failedPayments > 0 ? "danger" : "default"}
+          delay={200}
         />
-        <StatCard label="Refunded" value={stats.refundedPayments} icon={Wallet} />
-        <StatCard label="Total hotels" value={stats.totalHotels} icon={Building2} />
+        <StatCard label="Refunded" value={stats.refundedPayments} icon={Wallet} delay={240} />
+        <StatCard label="Total hotels" value={stats.totalHotels} icon={Building2} delay={280} />
 
-        <StatCard label="Total users" value={stats.totalUsers} icon={Users} />
+        <StatCard label="Total users" value={stats.totalUsers} icon={Users} delay={320} />
       </div>
 
       <div className="mt-10">

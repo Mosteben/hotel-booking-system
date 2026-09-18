@@ -210,7 +210,7 @@ export function PaymentList() {
               return (
                 <div
                   key={payment.id}
-                  className="flex flex-col gap-4 rounded-[14px] border border-line bg-white p-4 sm:flex-row sm:items-center"
+                  className="flex flex-col gap-4 rounded-[14px] border border-line bg-white p-4 transition-shadow duration-200 hover:shadow-[var(--shadow-card)] sm:flex-row sm:items-center"
                 >
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[11px] bg-cream text-teal">
                     <MethodIcon size={17} />
@@ -218,7 +218,7 @@ export function PaymentList() {
 
                   <div className="min-w-0 flex-1">
                     <p className="flex items-baseline gap-2">
-                      <span className="font-display text-lg font-bold text-ink">
+                      <span className="font-display text-lg font-bold text-gold">
                         ${payment.amount.toFixed(2)}
                       </span>
                       <span className="text-xs font-medium capitalize text-muted">

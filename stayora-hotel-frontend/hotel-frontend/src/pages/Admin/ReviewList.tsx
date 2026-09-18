@@ -118,7 +118,7 @@ export function ReviewList() {
               return (
                 <div
                   key={review.id}
-                  className="flex flex-col gap-3 rounded-[14px] border border-line bg-white p-4 sm:flex-row sm:items-start sm:justify-between"
+                  className="flex flex-col gap-3 rounded-[14px] border border-line bg-white p-4 transition-shadow duration-200 hover:shadow-[var(--shadow-card)] sm:flex-row sm:items-start sm:justify-between"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -128,7 +128,7 @@ export function ReviewList() {
                             key={i}
                             size={13}
                             className={
-                              i < review.rating ? "fill-teal text-teal" : "text-line"
+                              i < review.rating ? "fill-gold text-gold" : "text-line"
                             }
                           />
                         ))}

@@ -50,7 +50,7 @@ export function SearchBar() {
   return (
     <form
       onSubmit={handleSearch}
-      className="w-full rounded-panel border border-line bg-white shadow-[0_20px_60px_rgba(11,63,66,0.12)]"
+      className="w-full rounded-panel border border-line bg-white shadow-[var(--shadow-hover)]"
     >
       <div className="flex flex-col divide-y divide-line md:flex-row md:items-center md:divide-x md:divide-y-0">
         <Field icon={<MapPin size={17} />} label="Destination" className="md:w-[26%]">
@@ -58,7 +58,7 @@ export function SearchBar() {
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
             placeholder="Where are you going?"
-            className="w-full truncate bg-transparent text-sm font-semibold text-ink outline-none placeholder:text-muted placeholder:font-normal"
+            className="w-full truncate rounded-[6px] bg-transparent text-sm font-semibold text-ink outline-none placeholder:text-muted placeholder:font-normal focus-visible:ring-2 focus-visible:ring-teal/40"
           />
         </Field>
 
@@ -67,7 +67,7 @@ export function SearchBar() {
             type="date"
             value={checkIn}
             onChange={(e) => setCheckIn(e.target.value)}
-            className="w-full bg-transparent text-sm font-semibold text-ink outline-none [color-scheme:light]"
+            className="w-full rounded-[6px] bg-transparent text-sm font-semibold text-ink outline-none [color-scheme:light] focus-visible:ring-2 focus-visible:ring-teal/40"
           />
         </Field>
 
@@ -76,7 +76,7 @@ export function SearchBar() {
             type="date"
             value={checkOut}
             onChange={(e) => setCheckOut(e.target.value)}
-            className="w-full bg-transparent text-sm font-semibold text-ink outline-none [color-scheme:light]"
+            className="w-full rounded-[6px] bg-transparent text-sm font-semibold text-ink outline-none [color-scheme:light] focus-visible:ring-2 focus-visible:ring-teal/40"
           />
         </Field>
 
@@ -86,14 +86,14 @@ export function SearchBar() {
             min={1}
             value={guests}
             onChange={(e) => setGuests(Number(e.target.value))}
-            className="w-full truncate bg-transparent text-sm font-semibold text-ink outline-none"
+            className="w-full truncate rounded-[6px] bg-transparent text-sm font-semibold text-ink outline-none focus-visible:ring-2 focus-visible:ring-teal/40"
           />
         </Field>
 
         <div className="p-3 md:pl-2">
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-pill bg-teal px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-teal-dark md:w-14 md:p-0 md:py-3.5 cursor-pointer"
+            className="flex w-full items-center justify-center gap-2 rounded-pill bg-teal px-6 py-3.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-teal-dark active:scale-[0.97] md:w-14 md:p-0 md:py-3.5 cursor-pointer"
             aria-label="Search"
           >
             <Search size={18} />

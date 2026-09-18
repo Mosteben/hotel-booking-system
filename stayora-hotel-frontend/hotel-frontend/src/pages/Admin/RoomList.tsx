@@ -187,7 +187,7 @@ export function RoomList() {
               return (
                 <div
                   key={room.id}
-                  className="flex flex-col gap-4 rounded-[14px] border border-line bg-white p-4 sm:flex-row sm:items-center"
+                  className="flex flex-col gap-4 rounded-[14px] border border-line bg-white p-4 transition-shadow duration-200 hover:shadow-[var(--shadow-card)] sm:flex-row sm:items-center"
                 >
                   <div className="h-14 w-14 shrink-0 overflow-hidden rounded-[11px] bg-cream">
                     {room.image_url ? (

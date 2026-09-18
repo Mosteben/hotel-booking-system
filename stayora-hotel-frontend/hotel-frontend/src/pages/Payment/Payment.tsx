@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   BedDouble,
   Loader2,
-  TriangleAlert,
   Wallet,
   CreditCard,
   CheckCircle2,
@@ -15,6 +14,7 @@ import { Navbar } from "@/components/Navbar/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { BookingProgress } from "@/components/common/BookingProgress";
+import { ErrorState } from "@/components/common/ErrorState";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { getBookingByID } from "@/api/bookingApi";
 import { getRoomByID } from "@/api/roomApi";
@@ -137,14 +137,8 @@ export function Payment() {
     return (
       <div className="min-h-screen bg-bg">
         <Navbar />
-        <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 px-4 py-24 text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-500">
-            <TriangleAlert size={22} />
-          </span>
-          <p className="font-display text-lg font-semibold text-ink">
-            Couldn't load this booking
-          </p>
-          <p className="max-w-sm text-sm text-muted">{errorMessage}</p>
+        <div className="mx-auto max-w-2xl px-4 py-24 sm:px-6">
+          <ErrorState title="Couldn't load this booking" message={errorMessage} />
         </div>
       </div>
     );
@@ -161,7 +155,7 @@ export function Payment() {
       <div className="min-h-screen bg-bg">
         <Navbar />
         <div className="page-fade-in mx-auto max-w-xl px-4 py-14 sm:px-6">
-          <div className="rounded-card border border-line bg-white p-8 text-center shadow-[0_16px_40px_rgba(16,24,40,0.08)]">
+          <div className="rounded-card border border-line bg-white p-8 text-center shadow-[var(--shadow-hover)]">
             <span className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${content.tone}`}>
               <Icon size={26} />
             </span>
@@ -205,7 +199,7 @@ export function Payment() {
               </div>
               <div className="flex justify-between border-t border-line pt-2">
                 <span className="text-muted">Total paid</span>
-                <span className="font-display text-base font-bold text-ink">
+                <span className="font-display text-base font-bold text-gold">
                   ${booking.total_price.toFixed(2)}
                 </span>
               </div>
@@ -309,7 +303,7 @@ export function Payment() {
           </div>
 
           <div className="lg:col-span-2 lg:sticky lg:top-24 lg:self-start">
-            <div className="overflow-hidden rounded-card border border-line bg-white shadow-[0_16px_40px_rgba(16,24,40,0.08)]">
+            <div className="overflow-hidden rounded-card border border-line bg-white shadow-[var(--shadow-hover)]">
               <div className="h-24 overflow-hidden bg-cream">
                 {room?.image_url ? (
                   <img
@@ -351,7 +345,7 @@ export function Payment() {
                 </div>
                 <div className="flex items-center justify-between border-t border-line pt-4">
                   <span className="font-display text-base font-bold text-ink">Total</span>
-                  <span className="font-display text-xl font-bold text-ink">
+                  <span className="font-display text-xl font-bold text-gold">
                     ${booking.total_price.toFixed(2)}
                   </span>
                 </div>

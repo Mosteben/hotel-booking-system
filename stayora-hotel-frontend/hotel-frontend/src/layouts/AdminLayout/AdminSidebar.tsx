@@ -75,8 +75,12 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
           <LogoMark size={16} />
         </span>
         <div>
-          <p className="font-display text-sm font-semibold text-white">NileStay</p>
-          <p className="text-[11px] font-medium text-white/50">Admin</p>
+          <p className="font-display text-sm font-semibold text-admin-sidebar-text">
+            NileStay
+          </p>
+          <p className="text-[11px] font-medium text-admin-sidebar-text-secondary">
+            Admin
+          </p>
         </div>
       </div>
 
@@ -84,7 +88,7 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
         {sections.map((section, i) => (
           <div key={i}>
             {section.label && (
-              <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/35">
+              <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-admin-sidebar-text-secondary/70">
                 {section.label}
               </p>
             )}
@@ -96,10 +100,10 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
                     end={to === "/admin"}
                     onClick={onNavigate}
                     className={({ isActive }) =>
-                      `flex items-center justify-between gap-2 rounded-[10px] px-3 py-2.5 text-sm font-medium transition-colors ${
+                      `flex items-center justify-between gap-2 rounded-[10px] px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
                         isActive
-                          ? "bg-white/10 text-white"
-                          : "text-white/65 hover:bg-white/5 hover:text-white"
+                          ? "bg-admin-sidebar-active text-admin-sidebar-text hover:bg-admin-sidebar-active-hover"
+                          : "text-admin-sidebar-text-secondary hover:bg-admin-sidebar-hover hover:text-admin-sidebar-text"
                       }`
                     }
                   >
@@ -108,7 +112,7 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
                       {label}
                     </span>
                     {!!badge && badge > 0 && (
-                      <span className="flex h-5 min-w-5 items-center justify-center rounded-pill bg-teal px-1.5 text-[11px] font-semibold text-white">
+                      <span className="flex h-5 min-w-5 items-center justify-center rounded-pill bg-white/25 px-1.5 text-[11px] font-semibold text-admin-sidebar-text">
                         {badge}
                       </span>
                     )}
@@ -133,7 +137,7 @@ export function AdminSidebar({
   return (
     <>
       {/* Desktop: permanent sidebar */}
-      <aside className="hidden md:block md:w-64 md:shrink-0 md:bg-ink">
+      <aside className="hidden md:block md:w-64 md:shrink-0 md:bg-admin-sidebar-bg">
         <div className="md:fixed md:h-screen md:w-64">
           <SidebarContent onNavigate={() => {}} />
         </div>
@@ -146,11 +150,11 @@ export function AdminSidebar({
             className="absolute inset-0 bg-ink/50 backdrop-blur-sm"
             onClick={onClose}
           />
-          <div className="absolute inset-y-0 left-0 w-64 bg-ink shadow-2xl">
+          <div className="absolute inset-y-0 left-0 w-64 bg-admin-sidebar-bg shadow-2xl">
             <button
               onClick={onClose}
               aria-label="Close menu"
-              className="absolute right-3 top-5 rounded-full p-1.5 text-white/60 transition-colors hover:text-white cursor-pointer"
+              className="absolute right-3 top-5 rounded-full p-1.5 text-admin-sidebar-text-secondary transition-colors hover:text-admin-sidebar-text cursor-pointer"
             >
               <X size={18} />
             </button>

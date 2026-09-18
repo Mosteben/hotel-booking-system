@@ -1,11 +1,12 @@
 import { RefreshCw, TriangleAlert } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Skeleton } from "@/components/common/Skeleton";
 
 export function AdminLoadingRows({ count = 5 }: { count?: number }) {
   return (
     <div className="flex flex-col gap-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="h-16 w-full animate-pulse rounded-[14px] bg-line/60" />
+        <Skeleton key={i} className="h-16 w-full rounded-[14px]" />
       ))}
     </div>
   );

@@ -5,7 +5,6 @@ import {
   CalendarDays,
   Users,
   Loader2,
-  TriangleAlert,
   CheckCircle2,
   XCircle,
   MapPin,
@@ -14,6 +13,7 @@ import { Navbar } from "@/components/Navbar/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { BookingProgress } from "@/components/common/BookingProgress";
+import { ErrorState } from "@/components/common/ErrorState";
 import { getRoomByID, checkRoomAvailability } from "@/api/roomApi";
 import { getHotelByID } from "@/api/hotelApi";
 import { createBooking } from "@/api/bookingApi";
@@ -146,14 +146,8 @@ export function Booking() {
     return (
       <div className="min-h-screen bg-bg">
         <Navbar />
-        <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 px-4 py-24 text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-500">
-            <TriangleAlert size={22} />
-          </span>
-          <p className="font-display text-lg font-semibold text-ink">
-            Couldn't load this room
-          </p>
-          <p className="max-w-sm text-sm text-muted">{errorMessage}</p>
+        <div className="mx-auto max-w-2xl px-4 py-24 sm:px-6">
+          <ErrorState title="Couldn't load this room" message={errorMessage} />
         </div>
       </div>
     );
@@ -292,7 +286,7 @@ export function Booking() {
 
           {/* Sticky summary */}
           <div className="lg:col-span-2 lg:sticky lg:top-24 lg:self-start">
-            <div className="overflow-hidden rounded-card border border-line bg-white shadow-[0_16px_40px_rgba(16,24,40,0.08)]">
+            <div className="overflow-hidden rounded-card border border-line bg-white shadow-[var(--shadow-hover)]">
               <div className="h-28 overflow-hidden bg-cream">
                 {room.image_url ? (
                   <img
@@ -354,7 +348,7 @@ export function Booking() {
                     <span className="font-display text-base font-bold text-ink">
                       Total
                     </span>
-                    <span className="font-display text-xl font-bold text-ink">
+                    <span className="font-display text-xl font-bold text-gold">
                       ${estimatedTotal.toFixed(2)}
                     </span>
                   </div>

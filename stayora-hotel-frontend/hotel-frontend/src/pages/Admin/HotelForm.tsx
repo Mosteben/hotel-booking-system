@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { FormField, FormSelect } from "@/components/auth/FormField";
 import { AuthButton } from "@/components/auth/AuthButton";
+import { Skeleton } from "@/components/common/Skeleton";
 import { AdminBreadcrumb } from "@/components/Admin/AdminBreadcrumb";
 import { AdminPageHeader } from "@/components/Admin/AdminPageHeader";
 import { ConfirmDialog } from "@/components/Admin/ConfirmDialog";
@@ -269,7 +270,7 @@ export function HotelForm() {
   if (loadingHotel) {
     return (
       <div className="mx-auto max-w-3xl">
-        <div className="h-64 w-full animate-pulse rounded-[16px] bg-line/60" />
+        <Skeleton className="h-64 w-full rounded-[16px]" />
       </div>
     );
   }

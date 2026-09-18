@@ -5,13 +5,13 @@ import {
   CalendarDays,
   Users,
   Loader2,
-  TriangleAlert,
   MapPin,
   ArrowLeft,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { ErrorState } from "@/components/common/ErrorState";
 import { getBookingByID, cancelBooking } from "@/api/bookingApi";
 import { getRoomByID } from "@/api/roomApi";
 import { getHotelByID } from "@/api/hotelApi";
@@ -103,14 +103,8 @@ export function BookingDetails() {
     return (
       <div className="min-h-screen bg-bg">
         <Navbar />
-        <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 px-4 py-24 text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-500">
-            <TriangleAlert size={22} />
-          </span>
-          <p className="font-display text-lg font-semibold text-ink">
-            Couldn't load this booking
-          </p>
-          <p className="max-w-sm text-sm text-muted">{errorMessage}</p>
+        <div className="mx-auto max-w-2xl px-4 py-24 sm:px-6">
+          <ErrorState title="Couldn't load this booking" message={errorMessage} />
         </div>
       </div>
     );
@@ -152,7 +146,7 @@ export function BookingDetails() {
           </div>
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-card border border-line bg-white shadow-[0_8px_24px_rgba(16,24,40,0.06)]">
+        <div className="mt-6 overflow-hidden rounded-card border border-line bg-white shadow-[var(--shadow-card)]">
           <div className="flex h-40 items-center justify-center bg-cream">
             {imageUrl ? (
               <img src={imageUrl} alt={hotel?.name} className="h-full w-full object-cover" />
@@ -217,7 +211,7 @@ export function BookingDetails() {
 
             <div className="flex items-center justify-between rounded-[13px] bg-bg px-4 py-3">
               <span className="text-sm font-medium text-muted">Total price</span>
-              <span className="font-display text-xl font-bold text-ink">
+              <span className="font-display text-xl font-bold text-gold">
                 ${booking.total_price.toFixed(2)}
               </span>
             </div>

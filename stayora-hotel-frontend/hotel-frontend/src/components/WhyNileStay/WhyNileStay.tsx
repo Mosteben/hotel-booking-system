@@ -43,7 +43,7 @@ export function WhyNileStay() {
           {BENEFITS.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="flex flex-col items-start gap-3.5 rounded-card bg-white p-7 shadow-[0_8px_24px_rgba(16,24,40,0.06)]"
+              className="flex flex-col items-start gap-3.5 rounded-card bg-white p-7 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-hover)]"
             >
               <span className="flex h-11 w-11 items-center justify-center rounded-full bg-teal/10 text-teal">
                 <Icon size={20} />

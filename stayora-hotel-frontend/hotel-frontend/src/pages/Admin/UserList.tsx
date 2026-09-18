@@ -88,7 +88,10 @@ export function UserList() {
               </thead>
               <tbody>
                 {filtered.map((user) => (
-                  <tr key={user.id} className="border-b border-line last:border-0">
+                  <tr
+                    key={user.id}
+                    className="border-b border-line transition-colors last:border-0 hover:bg-bg"
+                  >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
                         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cream text-teal">

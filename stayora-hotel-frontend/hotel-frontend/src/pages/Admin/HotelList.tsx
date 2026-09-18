@@ -140,7 +140,7 @@ export function HotelList() {
               return (
                 <div
                   key={hotel.id}
-                  className="flex flex-col gap-4 rounded-[14px] border border-line bg-white p-4 sm:flex-row sm:items-center"
+                  className="flex flex-col gap-4 rounded-[14px] border border-line bg-white p-4 transition-shadow duration-200 hover:shadow-[var(--shadow-card)] sm:flex-row sm:items-center"
                 >
                   <div className="h-14 w-14 shrink-0 overflow-hidden rounded-[12px] bg-cream">
                     {hotel.image_url ? (
@@ -165,7 +165,7 @@ export function HotelList() {
                     <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                       {hotel.stars > 0 && (
                         <span className="inline-flex items-center gap-1 rounded-pill bg-bg px-2 py-0.5 text-[11px] font-semibold text-ink">
-                          <Star size={10} className="fill-teal text-teal" />
+                          <Star size={10} className="fill-gold text-gold" />
                           {hotel.stars}
                         </span>
                       )}

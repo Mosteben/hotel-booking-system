@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Loader2, TriangleAlert } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Navbar } from "@/components/Navbar/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { PageHeading } from "@/components/common/PageHeading";
+import { EmptyState } from "@/components/common/EmptyState";
+import { ErrorState } from "@/components/common/ErrorState";
 import {
   FavoriteHotelCard,
   FavoriteHotelCardSkeleton,
@@ -86,59 +88,53 @@ export function Favorites() {
 
         {status === "success" && (
           <div className="mt-10 flex flex-col gap-6">
-            {hotels.map((hotel) => (
-              <FavoriteHotelCard
+            {hotels.map((hotel, i) => (
+              <div
                 key={hotel.id}
-                hotel={hotel}
-                onFavoriteChange={(hotelId, isFavorite) => {
-                  if (isFavorite) return;
-                  setHotels((prev) => {
-                    const next = prev.filter((h) => h.id !== hotelId);
-                    if (next.length === 0) setStatus("empty");
-                    return next;
-                  });
-                }}
-              />
+                className="card-enter"
+                style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}
+              >
+                <FavoriteHotelCard
+                  hotel={hotel}
+                  onFavoriteChange={(hotelId, isFavorite) => {
+                    if (isFavorite) return;
+                    setHotels((prev) => {
+                      const next = prev.filter((h) => h.id !== hotelId);
+                      if (next.length === 0) setStatus("empty");
+                      return next;
+                    });
+                  }}
+                />
+              </div>
             ))}
           </div>
         )}
 
         {status === "empty" && (
-          <div className="mt-10 flex flex-col items-center gap-3 rounded-panel border border-dashed border-line bg-white px-6 py-20 text-center">
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-bg text-teal">
-              <Heart size={24} />
-            </span>
-            <p className="font-display text-lg font-semibold text-ink">
-              No favorites yet
-            </p>
-            <p className="max-w-sm text-sm text-muted">
-              Tap the heart icon on any hotel to save it here.
-            </p>
-            <Link
-              to="/"
-              className="mt-2 rounded-pill bg-teal px-6 py-3 text-sm font-semibold text-white hover:bg-teal-dark"
-            >
-              Browse hotels
-            </Link>
+          <div className="mt-10">
+            <EmptyState
+              icon={Heart}
+              title="No favorites yet"
+              description="Tap the heart icon on any hotel to save it here."
+              action={
+                <Link
+                  to="/"
+                  className="mt-2 rounded-pill bg-teal px-6 py-3 text-sm font-semibold text-white hover:bg-teal-dark"
+                >
+                  Browse hotels
+                </Link>
+              }
+            />
           </div>
         )}
 
         {status === "error" && (
-          <div className="mt-10 flex flex-col items-center gap-3 rounded-panel border border-line bg-white px-6 py-20 text-center">
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-500">
-              <TriangleAlert size={24} />
-            </span>
-            <p className="font-display text-lg font-semibold text-ink">
-              Couldn't load your favorites
-            </p>
-            <p className="max-w-sm text-sm text-muted">{errorMessage}</p>
-            <button
-              onClick={load}
-              className="mt-2 inline-flex items-center gap-2 rounded-pill bg-teal px-6 py-3 text-sm font-semibold text-white hover:bg-teal-dark cursor-pointer"
-            >
-              <Loader2 size={15} />
-              Try again
-            </button>
+          <div className="mt-10">
+            <ErrorState
+              title="Couldn't load your favorites"
+              message={errorMessage}
+              onRetry={load}
+            />
           </div>
         )}
       </div>

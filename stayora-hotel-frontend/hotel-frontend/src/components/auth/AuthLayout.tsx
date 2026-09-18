@@ -20,8 +20,8 @@ function BrandImagePanel({ order }: { order: "lg:order-1" | "lg:order-2" }) {
       {/* Light, airy overlay (was a dark navy gradient) so the panel reads
           as bright and premium instead of moody. Text below switches to
           dark ink to stay readable against it. */}
-      <div className="absolute inset-0 bg-gradient-to-t from-white/92 via-white/55 to-white/15" />
-      <div className="absolute inset-0 bg-gradient-to-tr from-teal/10 via-transparent to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-white/92 via-white/55 to-white/15" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-teal/10 via-transparent to-transparent" />
 
       <div className="relative flex h-full flex-col justify-between p-10 xl:p-14">
         <Link to="/" className="inline-flex w-fit">
@@ -59,7 +59,7 @@ export function AuthLayout({ imageSide = "left", children }: AuthLayoutProps) {
           The image panel lives inside it, so it's bound by this fixed
           height and can never stretch or get dragged along by a tall
           form anymore. */}
-      <div className="auth-card-in relative z-10 grid h-[85vh] w-full max-w-[1360px] grid-cols-1 overflow-hidden rounded-[32px] border border-line bg-white shadow-[0_30px_80px_-25px_rgba(16,24,40,0.25)] lg:grid-cols-2">
+      <div className="auth-card-in relative z-10 grid h-[85vh] w-full max-w-[1360px] grid-cols-1 overflow-hidden rounded-panel border border-line bg-white shadow-[var(--shadow-modal)] lg:grid-cols-2">
         <BrandImagePanel order={imageOrder} />
 
         <div className={`flex h-full min-h-0 flex-col ${formOrder}`}>

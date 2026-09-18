@@ -5,6 +5,7 @@ import type { Hotel } from "@/types/hotel";
 import { getHotelImageUrl } from "@/utils/hotelImages";
 import { getHotelStartingPrice } from "@/api/roomApi";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
+import { Skeleton } from "@/components/common/Skeleton";
 
 // A wide, horizontal card for the Favorites list - deliberately different
 // from the compact grid HotelCard used on Home/Search. Favorites is a
@@ -32,14 +33,18 @@ export function FavoriteHotelCard({
   }, [hotel.id]);
 
   return (
-    <article className="flex flex-col gap-6 rounded-card border border-line bg-white p-7 shadow-[0_8px_24px_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_16px_36px_rgba(16,24,40,0.1)] sm:p-8 lg:grid lg:grid-cols-[220px_1fr_180px] lg:items-stretch lg:gap-8">
+    <article className="group flex flex-col gap-6 rounded-card border border-line bg-white p-7 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-hover)] sm:p-8 lg:grid lg:grid-cols-[220px_1fr_180px] lg:items-stretch lg:gap-8">
       {/* Zone 1: image */}
       <Link
         to={`/hotels/${hotel.id}`}
         className="relative block h-48 w-full shrink-0 overflow-hidden rounded-[16px] bg-cream lg:h-auto"
       >
         {imageUrl ? (
-          <img src={imageUrl} alt={hotel.name} className="h-full w-full object-cover" />
+          <img
+            src={imageUrl}
+            alt={hotel.name}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-2">
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-teal shadow-sm">
@@ -50,7 +55,7 @@ export function FavoriteHotelCard({
         )}
         {hotel.stars > 0 && (
           <div className="absolute left-3 top-3 flex items-center gap-1 rounded-pill bg-white/95 px-2.5 py-1 text-xs font-semibold text-ink shadow-sm">
-            <Star size={12} className="fill-teal text-teal" />
+            <Star size={12} className="fill-gold text-gold" />
             {hotel.stars}
           </div>
         )}
@@ -80,7 +85,7 @@ export function FavoriteHotelCard({
             {startingPrice !== null ? "From" : "Price"}
           </p>
           {startingPrice !== null ? (
-            <p className="mt-1 font-display text-2xl font-bold text-ink">
+            <p className="mt-1 font-display text-2xl font-bold text-gold">
               ${startingPrice.toFixed(0)}
               <span className="text-sm font-normal text-muted"> / night</span>
             </p>
@@ -110,15 +115,15 @@ export function FavoriteHotelCard({
 export function FavoriteHotelCardSkeleton() {
   return (
     <div className="flex flex-col gap-6 rounded-card border border-line bg-white p-7 sm:p-8 lg:grid lg:grid-cols-[220px_1fr_180px] lg:gap-8">
-      <div className="h-48 w-full animate-pulse rounded-[16px] bg-line lg:h-auto" />
+      <Skeleton className="h-48 w-full rounded-[16px] lg:h-auto" />
       <div className="flex flex-col justify-center gap-3 lg:border-l lg:border-line lg:px-8">
-        <div className="h-5 w-48 animate-pulse rounded bg-line" />
-        <div className="h-3 w-32 animate-pulse rounded bg-line" />
-        <div className="h-3 w-full max-w-xs animate-pulse rounded bg-line" />
+        <Skeleton className="h-5 w-48" />
+        <Skeleton className="h-3 w-32" />
+        <Skeleton className="h-3 w-full max-w-xs" />
       </div>
       <div className="flex flex-col justify-center gap-4 lg:border-l lg:border-line lg:pl-8">
-        <div className="h-8 w-20 animate-pulse rounded bg-line" />
-        <div className="h-10 w-full animate-pulse rounded-pill bg-line" />
+        <Skeleton className="h-8 w-20" />
+        <Skeleton className="h-10 w-full rounded-pill" />
       </div>
     </div>
   );

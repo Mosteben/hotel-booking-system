@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { TriangleAlert, X } from "lucide-react";
 import type { ConfirmOptions } from "@/hooks/useConfirmDialog";
+import { useMountTransition } from "@/hooks/useMountTransition";
 
 interface ConfirmDialogProps extends ConfirmOptions {
   open: boolean;
@@ -19,6 +20,7 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   const confirmRef = useRef<HTMLButtonElement>(null);
+  const shouldMount = useMountTransition(open);
 
   useEffect(() => {
     if (!open) return;
@@ -31,11 +33,13 @@ export function ConfirmDialog({
     return () => window.removeEventListener("keydown", handleKey);
   }, [open, onCancel]);
 
-  if (!open) return null;
+  if (!shouldMount) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 backdrop-blur-sm"
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 backdrop-blur-sm ${
+        open ? "modal-backdrop-in" : "modal-backdrop-out"
+      }`}
       onClick={onCancel}
     >
       <div
@@ -43,12 +47,14 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm rounded-card border border-line bg-white p-6 shadow-[0_24px_60px_rgba(16,24,40,0.2)]"
+        className={`w-full max-w-sm rounded-card border border-line bg-white p-6 shadow-[var(--shadow-modal)] ${
+          open ? "modal-panel-in" : "modal-panel-out"
+        }`}
       >
         <div className="flex items-start gap-3">
           <span
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-              destructive ? "bg-red-50 text-red-500" : "bg-teal/10 text-teal"
+              destructive ? "bg-error-soft text-error" : "bg-teal/10 text-teal"
             }`}
           >
             <TriangleAlert size={18} />
@@ -83,8 +89,8 @@ export function ConfirmDialog({
           <button
             ref={confirmRef}
             onClick={onConfirm}
-            className={`rounded-pill px-4 py-2.5 text-sm font-semibold text-white transition-colors cursor-pointer ${
-              destructive ? "bg-red-500 hover:bg-red-600" : "bg-teal hover:bg-teal-dark"
+            className={`rounded-pill px-4 py-2.5 text-sm font-semibold text-white transition-all duration-150 active:scale-[0.97] cursor-pointer ${
+              destructive ? "bg-error hover:bg-red-700" : "bg-teal hover:bg-teal-dark"
             }`}
           >
             {confirmLabel}

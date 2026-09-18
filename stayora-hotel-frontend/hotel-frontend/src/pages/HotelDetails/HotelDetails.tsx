@@ -6,13 +6,15 @@ import {
   Phone,
   Mail,
   Star,
-  TriangleAlert,
   MessageSquareText,
+  BedDouble,
   ArrowDown,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
+import { EmptyState } from "@/components/common/EmptyState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { RoomCard } from "@/components/RoomCard/RoomCard";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { getHotelDetails } from "@/api/hotelApi";
@@ -20,6 +22,7 @@ import { getHotelAverageRating, getHotelReviews, createReview } from "@/api/revi
 import { getMyFavorites } from "@/api/favoriteApi";
 import { extractErrorMessage } from "@/api/client";
 import { getHotelImageUrl } from "@/utils/hotelImages";
+import { Skeleton } from "@/components/common/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import type { HotelDetails as HotelDetailsType } from "@/types/hotel";
 import type { Room } from "@/types/room";
@@ -142,19 +145,16 @@ export function HotelDetails() {
       <div className="min-h-screen bg-bg">
         <Navbar />
         <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
-          <div className="h-72 w-full animate-pulse rounded-panel bg-line sm:h-96" />
+          <Skeleton className="h-72 w-full rounded-panel sm:h-96" />
           <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="flex flex-col gap-3 lg:col-span-2">
-              <div className="h-7 w-72 animate-pulse rounded bg-line" />
-              <div className="h-4 w-48 animate-pulse rounded bg-line" />
+              <Skeleton className="h-7 w-72" />
+              <Skeleton className="h-4 w-48" />
               {Array.from({ length: 2 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="mt-4 h-28 w-full animate-pulse rounded-card bg-line"
-                />
+                <Skeleton key={i} className="mt-4 h-28 w-full rounded-card" />
               ))}
             </div>
-            <div className="h-56 w-full animate-pulse rounded-card bg-line" />
+            <Skeleton className="h-56 w-full rounded-card" />
           </div>
         </div>
       </div>
@@ -165,20 +165,12 @@ export function HotelDetails() {
     return (
       <div className="min-h-screen bg-bg">
         <Navbar />
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-24 text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-500">
-            <TriangleAlert size={22} />
-          </span>
-          <p className="font-display text-lg font-semibold text-ink">
-            Couldn't load this hotel
-          </p>
-          <p className="max-w-sm text-sm text-muted">{errorMessage}</p>
-          <button
-            onClick={load}
-            className="mt-2 rounded-pill bg-teal px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-dark cursor-pointer"
-          >
-            Try again
-          </button>
+        <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+          <ErrorState
+            title="Couldn't load this hotel"
+            message={errorMessage}
+            onRetry={load}
+          />
         </div>
       </div>
     );
@@ -208,7 +200,7 @@ export function HotelDetails() {
               <p className="text-sm font-medium text-muted">No photo yet</p>
             </div>
           )}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
           <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 sm:bottom-6 sm:left-6 sm:right-6">
             <div>
               <h1 className="font-display text-2xl font-bold text-white drop-shadow sm:text-3xl">
@@ -261,13 +253,13 @@ export function HotelDetails() {
               <div className="flex flex-wrap items-center gap-2.5">
                 {hotel.stars > 0 && (
                   <span className="inline-flex items-center gap-1 rounded-pill bg-bg px-2.5 py-1 text-xs font-semibold text-ink">
-                    <Star size={12} className="fill-teal text-teal" />
+                    <Star size={12} className="fill-gold text-gold" />
                     {hotel.stars}-star hotel
                   </span>
                 )}
                 {averageRating !== null && averageRating > 0 && (
-                  <span className="inline-flex items-center gap-1 rounded-pill bg-teal/10 px-2.5 py-1 text-xs font-semibold text-teal">
-                    <Star size={12} className="fill-teal text-teal" />
+                  <span className="inline-flex items-center gap-1 rounded-pill bg-gold-light px-2.5 py-1 text-xs font-semibold text-gold">
+                    <Star size={12} className="fill-gold text-gold" />
                     {averageRating.toFixed(1)} ({reviews.length}{" "}
                     {reviews.length === 1 ? "review" : "reviews"})
                   </span>
@@ -285,26 +277,33 @@ export function HotelDetails() {
                 </p>
               )}
 
-              <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
-                {hotel.address && (
-                  <span className="flex items-center gap-1.5">
-                    <MapPin size={14} />
-                    {hotel.address}
-                  </span>
-                )}
-                {hotel.phone && (
-                  <span className="flex items-center gap-1.5">
-                    <Phone size={14} />
-                    {hotel.phone}
-                  </span>
-                )}
-                {hotel.email && (
-                  <span className="flex items-center gap-1.5">
-                    <Mail size={14} />
-                    {hotel.email}
-                  </span>
-                )}
-              </div>
+              {(hotel.address || hotel.phone || hotel.email) && (
+                <div className="mt-6 rounded-card border border-line bg-white p-5">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                    Hotel information
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2.5 text-sm text-ink">
+                    {hotel.address && (
+                      <span className="flex items-center gap-1.5">
+                        <MapPin size={14} className="shrink-0 text-teal" />
+                        {hotel.address}
+                      </span>
+                    )}
+                    {hotel.phone && (
+                      <span className="flex items-center gap-1.5">
+                        <Phone size={14} className="shrink-0 text-teal" />
+                        {hotel.phone}
+                      </span>
+                    )}
+                    {hotel.email && (
+                      <span className="flex items-center gap-1.5">
+                        <Mail size={14} className="shrink-0 text-teal" />
+                        {hotel.email}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </section>
 
             {/* Rooms */}
@@ -313,15 +312,23 @@ export function HotelDetails() {
                 Available rooms
               </h2>
               {rooms.length === 0 ? (
-                <div className="mt-4 rounded-panel border border-dashed border-line bg-white px-6 py-12 text-center">
-                  <p className="text-sm text-muted">
-                    No rooms have been added to this hotel yet.
-                  </p>
+                <div className="mt-4">
+                  <EmptyState
+                    icon={BedDouble}
+                    title="No rooms yet"
+                    description="Rooms will appear here as soon as they're added to this hotel."
+                  />
                 </div>
               ) : (
                 <div className="mt-6 flex flex-col gap-6">
-                  {rooms.map((room) => (
-                    <RoomCard key={room.id} room={room} onBook={handleBook} />
+                  {rooms.map((room, i) => (
+                    <div
+                      key={room.id}
+                      className="card-enter"
+                      style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}
+                    >
+                      <RoomCard room={room} onBook={handleBook} />
+                    </div>
                   ))}
                 </div>
               )}
@@ -348,7 +355,7 @@ export function HotelDetails() {
                         <Star
                           size={20}
                           className={
-                            value <= rating ? "fill-teal text-teal" : "text-line"
+                            value <= rating ? "fill-gold text-gold" : "text-line"
                           }
                         />
                       </button>
@@ -383,11 +390,8 @@ export function HotelDetails() {
               )}
 
               {reviews.length === 0 ? (
-                <div className="mt-6 flex flex-col items-center gap-2 rounded-panel border border-dashed border-line bg-white px-6 py-12 text-center">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-bg text-teal">
-                    <MessageSquareText size={18} />
-                  </span>
-                  <p className="text-sm text-muted">No reviews yet.</p>
+                <div className="mt-6">
+                  <EmptyState icon={MessageSquareText} title="No reviews yet" />
                 </div>
               ) : (
                 <div className="mt-8 flex flex-col gap-6">
@@ -402,7 +406,7 @@ export function HotelDetails() {
                             key={i}
                             size={14}
                             className={
-                              i < review.rating ? "fill-teal text-teal" : "text-line"
+                              i < review.rating ? "fill-gold text-gold" : "text-line"
                             }
                           />
                         ))}
@@ -424,12 +428,12 @@ export function HotelDetails() {
 
           {/* Sticky booking sidebar */}
           <aside className="lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-card border border-line bg-white p-6 shadow-[0_16px_40px_rgba(16,24,40,0.08)]">
+            <div className="rounded-card border border-line bg-white p-6 shadow-[var(--shadow-hover)]">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted">
                 Starting from
               </p>
               {startingPrice !== null ? (
-                <p className="mt-1 font-display text-3xl font-bold text-ink">
+                <p className="mt-1 font-display text-3xl font-bold text-gold">
                   ${startingPrice.toFixed(0)}
                   <span className="text-sm font-normal text-muted"> / night</span>
                 </p>

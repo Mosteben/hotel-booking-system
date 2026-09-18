@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { SearchX, RefreshCw, TriangleAlert, SlidersHorizontal } from "lucide-react";
+import { SearchX, SlidersHorizontal } from "lucide-react";
 import { Navbar } from "@/components/Navbar/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { PageHeading } from "@/components/common/PageHeading";
+import { EmptyState } from "@/components/common/EmptyState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { SearchBar } from "@/components/SearchBar/SearchBar";
 import { HotelCard, HotelCardSkeleton } from "@/components/HotelCard/HotelCard";
 import { searchHotels } from "@/api/hotelApi";
@@ -173,48 +175,39 @@ export function Search() {
 
         {status === "success" && (
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-y-10 lg:grid-cols-3 lg:gap-10">
-            {sortedHotels.map((hotel) => (
-              <HotelCard
+            {sortedHotels.map((hotel, i) => (
+              <div
                 key={hotel.id}
-                hotel={hotel}
-                favoriteKnown={favoriteIds !== null}
-                initialFavorite={favoriteIds?.has(hotel.id) ?? false}
-              />
+                className="card-enter"
+                style={{ animationDelay: `${Math.min(i, 11) * 50}ms` }}
+              >
+                <HotelCard
+                  hotel={hotel}
+                  favoriteKnown={favoriteIds !== null}
+                  initialFavorite={favoriteIds?.has(hotel.id) ?? false}
+                />
+              </div>
             ))}
           </div>
         )}
 
         {status === "empty" && (
-          <div className="mt-8 flex flex-col items-center gap-3 rounded-panel border border-dashed border-line bg-white px-6 py-16 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-bg text-teal">
-              <SearchX size={22} />
-            </span>
-            <p className="font-display text-lg font-semibold text-ink">
-              No stays match your search
-            </p>
-            <p className="max-w-sm text-sm text-muted">
-              Try a different destination, fewer guests, or a wider price
-              range.
-            </p>
+          <div className="mt-8">
+            <EmptyState
+              icon={SearchX}
+              title="No stays match your search"
+              description="Try a different destination, fewer guests, or a wider price range."
+            />
           </div>
         )}
 
         {status === "error" && (
-          <div className="mt-8 flex flex-col items-center gap-3 rounded-panel border border-line bg-white px-6 py-16 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-500">
-              <TriangleAlert size={22} />
-            </span>
-            <p className="font-display text-lg font-semibold text-ink">
-              Couldn't search hotels
-            </p>
-            <p className="max-w-sm text-sm text-muted">{errorMessage}</p>
-            <button
-              onClick={load}
-              className="mt-2 inline-flex items-center gap-2 rounded-pill bg-teal px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-dark cursor-pointer"
-            >
-              <RefreshCw size={15} />
-              Try again
-            </button>
+          <div className="mt-8">
+            <ErrorState
+              title="Couldn't search hotels"
+              message={errorMessage}
+              onRetry={load}
+            />
           </div>
         )}
       </div>
