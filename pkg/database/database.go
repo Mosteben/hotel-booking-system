@@ -34,14 +34,14 @@ func Connect() {
 	}
 
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-		configs.GetEnv("DB_HOST"),
-		configs.GetEnv("DB_USER"),
-		configs.GetEnv("DB_PASSWORD"),
-		configs.GetEnv("DB_NAME"),
-		configs.GetEnv("DB_PORT"),
-		sslMode,
-	)
+	"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s search_path=public",
+	configs.GetEnv("DB_HOST"),
+	configs.GetEnv("DB_USER"),
+	configs.GetEnv("DB_PASSWORD"),
+	configs.GetEnv("DB_NAME"),
+	configs.GetEnv("DB_PORT"),
+	sslMode,
+)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
