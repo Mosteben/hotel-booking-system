@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strings"
 	"time"
 
 	authHandler "github.com/Mosteben/hotel-booking-system/internal/auth/handler"
@@ -268,11 +269,16 @@ func main() {
 	// CORS
 	// =========================
 
-	// The allowed frontend origin comes from the environment so the same
+	// The allowed frontend origin(s) come from the environment so the same
 	// binary works in dev and in a real deployment without a code change.
-	// AllowCredentials is true (JWT is sent from the browser), so this
-	// must stay a single explicit origin - never "*" - or browsers will
-	// reject the credentialed request outright.
+	// FRONTEND_URL accepts one origin or a comma-separated list (e.g. the
+	// deployed frontend and localhost together) - this is what lets both
+	// a production frontend and local dev work against the same backend
+	// at once. AllowCredentials is true (JWT is sent from the browser),
+	// so every entry must be an exact origin - never "*" - or browsers
+	// will reject the credentialed request outright. gin-contrib/cors
+	// itself never echoes back "*" here; with AllowCredentials it reflects
+	// only whichever configured origin actually matches the request.
 	frontendURL := configs.GetEnv("FRONTEND_URL")
 	if frontendURL == "" {
 		log.Println(
@@ -281,12 +287,18 @@ func main() {
 		frontendURL = "http://localhost:5173"
 	}
 
+	var allowedOrigins []string
+	for _, origin := range strings.Split(frontendURL, ",") {
+		origin = strings.TrimSpace(origin)
+		if origin != "" {
+			allowedOrigins = append(allowedOrigins, origin)
+		}
+	}
+
 	r.Use(middleware.SecurityHeaders())
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins: []string{
-			frontendURL,
-		},
+		AllowOrigins: allowedOrigins,
 
 		AllowMethods: []string{
 			"GET",
